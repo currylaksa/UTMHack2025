@@ -1,9 +1,8 @@
 // src/components/Navbar.jsx
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom'; // Use NavLink for active styling
+import { Link, NavLink } from 'react-router-dom';
 
 function Navbar() {
-  // Define an active style for NavLink
   const activeStyle = ({ isActive }) => {
     return {
       fontWeight: isActive ? 'bold' : 'normal',
@@ -12,7 +11,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-blue-700 text-white shadow-md sticky top-0 z-50"> {/* Use blue based on docs [cite: 77] */}
+    <nav className="bg-blue-700 text-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo/Brand */}
@@ -22,51 +21,36 @@ function Navbar() {
             </Link>
           </div>
 
-          {/* Navigation Links */}
+          {/* Navigation Links - Updated Paths */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
               <NavLink
-                to="/"
+                to="/" // Home/Landing Page
                 style={activeStyle}
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-600"
+                end // Match only the exact root path
               >
                 Home
               </NavLink>
               <NavLink
-                to="/timeline"
+                to="/newhire" // Link to the New Hire base route
                 style={activeStyle}
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-600"
               >
-                My Timeline
+                New Hire View
               </NavLink>
-              {/* Consider adding First Month route if needed */}
-              {/* <NavLink
-                to="/first-month"
-                style={activeStyle}
-                className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-600"
-              >
-                First Month
-              </NavLink> */}
               <NavLink
-                to="/dashboard"
+                to="/manager" // Link to the Manager Dashboard
                 style={activeStyle}
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-600"
               >
                 Manager Dashboard
               </NavLink>
-              {/* Add other links like Profile, Settings later */}
             </div>
           </div>
 
-          {/* Placeholder for Mobile Menu Button - Implement later if needed */}
-          <div className="md:hidden">
-            <button className="bg-blue-600 inline-flex items-center justify-center p-2 rounded-md text-blue-200 hover:text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-600 focus:ring-white">
-              {/* Icon placeholder */}
-              <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
+          {/* Mobile Menu Button Placeholder */}
+          {/* ... (keep the mobile button if you had it) ... */}
         </div>
       </div>
     </nav>
