@@ -12,16 +12,24 @@ function Navbar() {
   useEffect(() => {
     const path = location.pathname;
     
-    // Set current view title
+    // Set current view title and user type
     if (path === '/') {
       setCurrentViewTitle('Home');
       setUserType(null);
-    } else if (path.includes('/newhire')) {
-      setCurrentViewTitle(path.includes('/timeline') ? 'Timeline View' : 'First Month Experience');
+    } else if (path.startsWith('/newhire')) { // Use startsWith for nested routes
       setUserType('New Hire');
-    } else if (path.includes('/manager')) {
+      // Update title based on specific new hire page
+      if (path === '/newhire/firstmonth') {
+         setCurrentViewTitle('First Month Details'); // Specific title for this view
+      } else {
+         setCurrentViewTitle('Onboarding Timeline'); // Default title for /newhire or /newhire/timeline
+      }
+    } else if (path.startsWith('/manager')) {
       setCurrentViewTitle('Manager Dashboard');
       setUserType('Manager');
+    } else {
+      setCurrentViewTitle('Page Not Found');
+      setUserType(null);
     }
   }, [location]);
 
@@ -53,39 +61,15 @@ function Navbar() {
 
           {/* Navigation Links - Desktop */}
           <div className="hidden md:flex items-center space-x-1">
-            {/* Quick view switching tabs for New Hire */}
-            {userType === 'New Hire' && (
-              <div className="mr-6 flex bg-blue-800/30 rounded-lg p-1">
-                <NavLink
-                  to="/newhire"
-                  className={({ isActive }) => 
-                    `px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                      isActive ? 'bg-white text-blue-700' : 'hover:bg-blue-500'
-                    }`
-                  }
-                >
-                  Timeline View
-                </NavLink>
-                <NavLink
-                  to="first-month"
-                  className={({ isActive }) => 
-                    `px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                      isActive ? 'bg-white text-blue-700' : 'hover:bg-blue-500'
-                    }`
-                  }
-                >
-                  First Month Experience
-                </NavLink>
-              </div>
-            )}
-
+            {/* ----- REMOVED New Hire specific tabs ----- */}
+            
             {/* Demo Controls - Quick Switch */}
             <div className="flex items-center space-x-2">
               <NavLink
-                to="/newhire/timeline"
+                to="/newhire/timeline" // Points to the default New Hire view
                 className={({ isActive }) => 
                   `px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                    isActive || (userType === 'New Hire' && !location.pathname.includes('/firstmonth')) 
+                    location.pathname.startsWith('/newhire') 
                       ? 'bg-blue-900' 
                       : 'hover:bg-blue-500'
                   }`
@@ -124,7 +108,6 @@ function Navbar() {
               className="p-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
             >
               <span className="sr-only">Open main menu</span>
-              {/* Icon for menu */}
               <svg
                 className="h-6 w-6"
                 xmlns="http://www.w3.org/2000/svg"
@@ -161,33 +144,26 @@ function Navbar() {
             Home
           </NavLink>
           
-          {/* New Hire Options */}
+          {/* New Hire Option (Simplified) */}
           <div className="py-1 border-t border-blue-700">
             <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-blue-300">
-              New Hire Views
+              New Hire View
             </div>
             <NavLink
-              to="/newhire/timeline"
+              to="/newhire/timeline" // Link directly to the timeline
               className={({ isActive }) => 
+                // Highlight if on any /newhire page
                 `block pl-6 pr-3 py-2 rounded-md text-base font-medium ${
-                  isActive ? 'bg-blue-900 text-white' : 'hover:bg-blue-700'
+                  location.pathname.startsWith('/newhire') ? 'bg-blue-900 text-white' : 'hover:bg-blue-700'
                 }`
               }
               onClick={() => setMobileMenuOpen(false)}
+              // `end` prop might be needed if you want it only active on /timeline exactly
+              // end 
             >
-              Timeline View
+              Onboarding Timeline
             </NavLink>
-            <NavLink
-              to="/newhire/firstmonth"
-              className={({ isActive }) => 
-                `block pl-6 pr-3 py-2 rounded-md text-base font-medium ${
-                  isActive ? 'bg-blue-900 text-white' : 'hover:bg-blue-700'
-                }`
-              }
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              First Month Experience
-            </NavLink>
+             {/* ----- REMOVED First Month Experience link ----- */}
           </div>
           
           {/* Manager Dashboard */}
