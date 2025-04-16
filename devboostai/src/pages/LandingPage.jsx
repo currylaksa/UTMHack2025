@@ -272,10 +272,6 @@ function LandingPage() {
           </div>
         </section>
       </main>
-
-      <footer className="bg-gray-800 text-white text-center py-6">
-        <p className="text-sm opacity-80">© 2025 DevBoost AI - UTM Hackathon Project</p>
-      </footer>
     </div>
   );
 }
