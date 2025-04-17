@@ -170,10 +170,10 @@ Based on research of similar AI-enhanced solutions, DevBoost AI could deliver:
 
 ## 👥 Team
 
-- [Your Name] - Team Lead
-- [Team Member 2] - UI/UX Designer
-- [Team Member 3] - Frontend Developer
-- [Team Member 4] - AI Implementation Specialist
+- Chong Kai Zhi - UI/UX Designer
+- Chan Qing Yee - Frontend Developer
+- Tham Ren Sheng - Business Analyst
+- Ong Jia Yu - AI Implementation Specialist
 
 ## 📄 License
 
