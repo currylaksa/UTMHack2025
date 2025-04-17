@@ -11,7 +11,11 @@ DevBoost AI is a generative AI-powered onboarding platform specifically designed
 
 This repository contains the frontend prototype developed for the UTM Hackathon preliminary round, focused on creating an intuitive and visually compelling demonstration of how AI can enhance the onboarding experience.
 
-![DevBoost AI Overview](https://via.placeholder.com/800x400?text=DevBoost+AI+Overview)
+## 🔗 Project Links
+
+* **Proposal:** [Click Here](https://docs.google.com/document/d/1QoBZJ26CvayosYuX8hdKs15RLFReUwN_9j6miNflpmc/edit?usp=sharing)
+* **Poster:** [Click Here]() Will be update soon
+* **Demo Video:** [Click Here]() Will be update soon
 
 ## 🎯 Problem Statement
 
