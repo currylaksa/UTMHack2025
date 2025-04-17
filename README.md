@@ -75,7 +75,7 @@ For the preliminary round, we will focus exclusively on frontend development to 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/devboost-ai.git
+   git clone https://github.com/currylaksa/UTMHack2025.git
    cd devboost-ai
    ```
 
