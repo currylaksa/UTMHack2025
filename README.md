@@ -17,73 +17,55 @@ This repository contains the frontend prototype developed for the UTM Hackathon 
 
 New software engineering hires face three significant challenges:
 
-1. **Information Overload**: Engineers must quickly learn company processes, technical stacks, and team dynamics while becoming productive.
+1. **Overwhelming Information Overload**: Engineers must quickly learn company processes, technical practices, and team dynamics while becoming productive.
 2. **Inconsistent Support**: Managers struggle to provide consistent, personalized guidance when handling multiple new hires.
-3. **Productivity Gap**: Traditional onboarding often delays the time it takes for engineers to become fully productive.
+3. **Productivity Gap**: Companies need engineers to become productive quickly, but traditional onboarding often creates delays and frustration.
 
-The cost of ineffective onboarding is substantial - leading to higher turnover rates, reduced productivity, and diminished team cohesion. For software engineering roles specifically, this translates to delayed project timelines and increased technical debt.
+The cost of ineffective onboarding is substantial - studies show that poor onboarding leads to higher turnover rates, reduced productivity, and diminished team cohesion. For software engineering roles specifically, this translates to delayed project timelines and increased technical debt.
 
 ## ✨ Solution
 
-DevBoost AI serves as an intelligent onboarding companion for software engineers that delivers personalized guidance and support throughout their first year at the company. The solution leverages generative AI to:
-
-- Create customized learning paths based on role and experience
-- Answer technical and organizational questions in real-time
-- Provide stage-specific resources and recommendations
-- Give managers insights to better support their team members
-- Track progress and suggest interventions when needed
-
-## 🖼️ Key Interfaces
-
-The prototype focuses on four high-impact interfaces:
+DevBoost AI serves as an intelligent onboarding companion for software engineers that delivers personalized guidance and support throughout their first year at the company. The solution leverages generative AI to transform the onboarding experience through four key interfaces:
 
 ### 1. Landing Page
-Introduces the solution with a compelling value proposition, animated demonstrations, and clear calls to action for both new hires and managers.
-
-![Landing Page](https://via.placeholder.com/600x300?text=Landing+Page)
+A visually appealing introduction to the platform that features:
+- Hero Section with compelling headline: "DevBoost AI: Accelerating Engineer Onboarding with AI" 
+- Value proposition: "30% faster productivity, 25% less manager overhead"
+- User Selection Panel with prominent buttons for "New Hire View" and "Manager View"
+- Animated Illustration showing a simplified onboarding journey with an AI assistant icon
 
 ### 2. New Hire Timeline View
-An interactive visualization of the 12-month onboarding journey that provides clear visibility into:
-- Current progress and upcoming milestones
-- Stage-specific tasks and resources
-- AI-powered recommendations
-- Just-in-time assistance
-
-![Timeline View](https://via.placeholder.com/600x300?text=Timeline+View)
+An interactive visualization of the 12-month onboarding journey that provides:
+- Horizontal Timeline with visual representation of months 1-12
+- Current Month Panel showing progress and task checklist
+- Quick AI Tip providing non-intrusive, contextual suggestions
 
 ### 3. First Month Experience
 A detailed view of the critical initial onboarding period featuring:
-- Personalized welcome experience
-- Technical environment setup guidance
-- Team introductions with AI-generated conversation starters
-- Initial skill assessment and learning plan
-- Administrative task tracking
-
-![First Month](https://via.placeholder.com/600x300?text=First+Month+Experience)
+- Setup Guide for technical environment configuration
+- AI Assistant Panel with example conversations and support
+- Resources Section with card-based layout of key documentation
 
 ### 4. Manager Dashboard
 A powerful oversight tool providing:
-- Team-wide onboarding status overview
-- AI-generated insights about potential challenges
-- Intervention recommendations at critical moments
-- Performance prediction based on engagement metrics
-
-![Manager Dashboard](https://via.placeholder.com/600x300?text=Manager+Dashboard)
+- Team Overview Statistics showing completion rates and required actions
+- Team Members Table with visual progress indicators and status tags
+- AI Insights Panel highlighting actionable recommendations
 
 ## 🛠️ Technical Implementation
 
 ### Frontend Technology Stack
-- **Framework:** React.js with TypeScript
-- **Styling:** Tailwind CSS for responsive design
+- **Framework:** React with TypeScript for robust component development
+- **Styling:** Tailwind CSS with custom color variables:
+  - Primary: blue-600 (professional, trustworthy)
+  - Secondary: teal-500 (growth, progress)
+  - Accent: indigo-400 (innovation, technology)
 - **UI Components:** Chakra UI for accessible, pre-built components
-- **State Management:** Context API for simplified state handling
-- **Data Persistence:** Local Storage for demonstration purposes
+- **State Management:** Context API for streamlined state management
+- **Data Persistence:** Local Storage for prototype data persistence
+- **AI Simulation:** Mock API Layer for simulating AI interactions
 
-### AI Simulation
-For the prototype, AI functionality is simulated using:
-- Structured mock data
-- Keyword-triggered responses
-- Pre-defined recommendations and insights
+For the preliminary round, we will focus exclusively on frontend development to create a visually impressive, interactive prototype that effectively demonstrates the concept.
 
 ## 🚀 Getting Started
 
@@ -107,33 +89,38 @@ For the prototype, AI functionality is simulated using:
 ## 📂 Project Structure
 
 ```
-devboost-ai/
+devboostai/
 ├── public/
-│   └── assets/
-│       └── images/
+│   └── vite.svg
 ├── src/
 │   ├── components/
-│   │   ├── common/
-│   │   ├── landing/
-│   │   ├── timeline/
-│   │   ├── firstMonth/
-│   │   └── managerDashboard/
-│   ├── context/
-│   ├── data/
-│   │   └── mockData.ts
-│   ├── hooks/
+│   │   ├── Footer.jsx
+│   │   └── Navbar.jsx
 │   ├── pages/
-│   ├── types/
-│   ├── utils/
-│   ├── App.tsx
-│   └── main.tsx
-├── .eslintrc.js
-├── .gitignore
+│   │   ├── LandingPage.jsx
+│   │   ├── manager/
+│   │   │   └── ManagerDashboard.jsx
+│   │   └── newhires/
+│   │       ├── FirstMonthView.jsx
+│   │       ├── NewHireLayout.jsx
+│   │       └── TimelineView.jsx
+│   ├── assets/
+│   │   └── react.svg
+│   ├── images/
+│   │   ├── JY1.png
+│   │   ├── JY2.jpg
+│   │   ├── QY1.png
+│   │   └── QY2.jpg
+│   ├── App.css
+│   ├── App.jsx
+│   ├── index.css
+│   └── main.jsx
+├── eslint.config.js
 ├── index.html
 ├── package.json
-├── README.md
+├── postcss.config.js
 ├── tailwind.config.js
-└── tsconfig.json
+└── vite.config.js
 ```
 
 ## 🔍 Features
@@ -153,11 +140,20 @@ devboost-ai/
 - Resource allocation suggestions
 - Performance prediction based on engagement metrics
 
+## 💪 Competitive Advantages
+
+DevBoost AI stands out from traditional onboarding solutions through:
+
+- **Personalization at Scale**: The AI engine adapts content and recommendations based on role, experience level, and progress.
+- **Proactive Support**: Rather than waiting for questions, the system anticipates needs based on the onboarding timeline.
+- **Dual-Focused Value**: The solution simultaneously benefits new hires and managers, creating alignment between both stakeholder groups.
+- **Visual Journey Mapping**: The interactive timeline creates clarity and motivation throughout the entire first year.
+
 ## 🔮 Future Expansion
 
 While the current prototype focuses on frontend implementation, the concept is designed for future expansion:
 
-- **Backend Integration**: API-driven architecture with real database
+- **Full Backend Integration**: API-driven architecture with real database
 - **Genuine AI Implementation**: Connection to GPT or similar models
 - **Analytics Engine**: Advanced metrics and performance tracking
 - **Integration Capabilities**: Calendar, documentation, and workflow connections
@@ -174,10 +170,10 @@ Based on research of similar AI-enhanced solutions, DevBoost AI could deliver:
 
 ## 👥 Team
 
-- [Team Member 1] - Role
-- [Team Member 2] - Role
-- [Team Member 3] - Role
-- [Team Member 4] - Role
+- [Your Name] - Team Lead
+- [Team Member 2] - UI/UX Designer
+- [Team Member 3] - Frontend Developer
+- [Team Member 4] - AI Implementation Specialist
 
 ## 📄 License
 
