@@ -230,15 +230,17 @@ function TimelineView() {
       </div>
 
       {/* Timeline Visualization - Desktop View (hidden on mobile) */}
-      <div className="bg-gradient-to-br from-white to-indigo-50 p-6 rounded-xl shadow-lg border border-indigo-100 hidden md:block">
-        <h3 className="text-xl font-bold mb-8 text-gray-800 flex items-center">
-          <CalendarIcon className="h-6 w-6 mr-2 text-indigo-600" />
-          Journey Timeline
-        </h3>
+      <div className="bg-gradient-to-br from-white to-indigo-50 p-8 rounded-xl shadow-lg border border-indigo-100 hidden md:block">
+        <div className="flex items-center mb-6">
+          <div className="bg-indigo-100 p-2 rounded-lg">
+            <CalendarIcon className="h-6 w-6 text-indigo-600" />
+          </div>
+          <h3 className="ml-3 text-xl font-bold text-gray-800">Journey Timeline</h3>
+        </div>
         
         <div className="relative px-6 py-12">
           {/* Connecting Line with gradient */}
-          <div className="absolute top-1/2 left-0 right-0 h-2 bg-gradient-to-r from-blue-400 via-purple-400 to-amber-400 transform -translate-y-1/2 z-0 rounded-full shadow-inner"></div>
+          <div className="absolute top-1/2 left-0 right-0 h-3 bg-gradient-to-r from-blue-400 via-purple-500 to-amber-500 transform -translate-y-1/2 z-0 rounded-full shadow-md"></div>
 
           {/* Stages */}
           <div className="relative flex justify-between z-10">
@@ -250,59 +252,81 @@ function TimelineView() {
               const isFirstMonth = stage.month === 1;
               const isLocked = monthNum > currentProgressMonth;
               const isAnimating = animatingStage === stage.month;
+              
+              // Determine connector colors for gradient effect
+              const gradientFrom = index === 0 ? "from-blue-400" : 
+                                  index === 1 ? "from-purple-400" : 
+                                  index === 2 ? "from-indigo-400" :
+                                  index === 3 ? "from-teal-400" :
+                                  index === 4 ? "from-pink-400" : "from-amber-400";
+              
+              const gradientTo = index === timelineStages.length - 1 ? "to-amber-400" :
+                                index === 4 ? "to-pink-400" :
+                                index === 3 ? "to-teal-400" :
+                                index === 2 ? "to-indigo-400" :
+                                index === 1 ? "to-purple-400" : "to-blue-400";
 
               return (
                 <div key={stage.month} className="relative flex flex-col items-center z-20">
-                  {/* Stage Circle/Node */}
+                  {/* Stage Circle/Node - refined for better visual appeal */}
                   <button
                     onClick={() => handleStageClick(stage)}
                     disabled={isLocked && !isFirstMonth}
                     className={`
                       relative ${stage.color} ${stage.textColor}
-                      rounded-xl h-20 w-20 flex flex-col items-center justify-center
-                      font-semibold text-xs border-2 transform transition-all duration-300
+                      rounded-2xl h-24 w-24 flex flex-col items-center justify-center
+                      font-semibold text-sm border-2 transform transition-all duration-300
                       shadow-md hover:shadow-lg
                       ${isSelected ? `ring-4 ${stage.ringColor} ${stage.borderColor} scale-110 z-30` : `${stage.borderColor}`}
                       ${isFirstMonth ? 'hover:scale-110 hover:ring-4 hover:ring-blue-300 cursor-pointer' : ''}
-                      ${isCompleted ? 'opacity-80' : ''}
-                      ${isLocked && !isFirstMonth ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'}
+                      ${isCompleted ? 'bg-opacity-90' : ''}
+                      ${isLocked && !isFirstMonth ? 'opacity-60 cursor-not-allowed filter grayscale-[30%]' : 'hover:scale-110'}
                       ${isAnimating ? 'animate-pulse scale-125' : ''}
                       ${isCurrent ? `border-2 ${stage.borderColor}` : ''}
                     `}
                     style={{ 
-                      boxShadow: isSelected ? `0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 2px ${stage.borderColor}` : '' 
+                      boxShadow: isSelected ? `0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1), 0 0 0 2px ${stage.borderColor}` : '' 
                     }}
                     aria-label={isFirstMonth ? `View details for ${stage.title}` : `Select ${stage.title}`}
                   >
                     {isCompleted && (
                       <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1 shadow-lg">
-                        <CheckCircleIcon className="w-4 h-4 text-white" />
+                        <CheckCircleIcon className="w-5 h-5 text-white" />
                       </div>
                     )}
                     {isFirstMonth && (
                       <div className="absolute -bottom-2 -right-2 bg-blue-600 rounded-full p-1 shadow-lg animate-pulse">
-                        <ArrowRightCircleIcon className="w-4 h-4 text-white" />
+                        <ArrowRightCircleIcon className="w-5 h-5 text-white" />
                       </div>
                     )}
                     <div className="flex flex-col items-center">
-                      <div className={`${stage.iconBg} p-2 rounded-full mb-2 text-white shadow-sm`}>
+                      <div className={`${stage.iconBg} p-2.5 rounded-full mb-2 text-white shadow-sm`}>
                         {stage.icon}
                       </div>
-                      <span className="font-medium">{stage.month}</span>
+                      <span className="font-semibold text-base">{stage.month}</span>
                     </div>
                     {isCurrent && (
-                      <span className="absolute -bottom-6 text-xs font-medium px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-sm">Current</span>
+                      <span className="absolute -bottom-7 text-xs font-medium px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full shadow-md">
+                        Current
+                      </span>
                     )}
                   </button>
 
+                  {/* Title label above the box */}
+                  <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap
+                    text-sm font-medium px-3 py-1 ${stage.textColor} transition-all duration-300
+                    ${isSelected || isCurrent ? 'opacity-100' : 'opacity-70'}`}
+                  >
+                    {stage.title}
+                  </div>
+
                   {/* Bottom Description - enhanced with animation */}
                   <div className={`
-                    absolute top-full left-1/2 transform -translate-x-1/2 mt-10 w-48 text-center 
-                    text-xs bg-white p-3 rounded-lg shadow-lg border border-gray-100
+                    absolute top-full left-1/2 transform -translate-x-1/2 mt-12 w-52 text-center 
+                    text-xs bg-white p-4 rounded-lg shadow-lg border border-gray-200
                     transition-all duration-300
                     ${(isSelected || isCurrent) ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}
                   `}>
-                    <p className="font-medium text-gray-800 mb-1">{stage.title}</p>
                     <p className="text-gray-600">{stage.description}</p>
                   </div>
                 </div>
@@ -310,22 +334,34 @@ function TimelineView() {
             })}
           </div>
         </div>
+
+        {/* Journey Progress Indicator */}
+        <div className="mt-16 flex items-center justify-center">
+          <div className="bg-white px-4 py-2 rounded-full shadow-sm border border-indigo-100 flex items-center text-sm">
+            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse mr-2"></div>
+            <span className="text-gray-700">
+              <span className="font-medium">Current progress:</span> Month {currentProgressMonth} of 12
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Timeline Visualization - Mobile View (shown only on mobile) */}
       <div className="bg-gradient-to-br from-white to-indigo-50 p-5 rounded-xl shadow-lg border border-indigo-100 md:hidden">
-        <h3 className="text-lg font-bold mb-6 text-gray-800 flex items-center">
-          <CalendarIcon className="h-5 w-5 mr-2 text-indigo-600" />
-          Journey Timeline
-        </h3>
+        <div className="flex items-center mb-6">
+          <div className="bg-indigo-100 p-2 rounded-lg">
+            <CalendarIcon className="h-5 w-5 text-indigo-600" />
+          </div>
+          <h3 className="ml-3 text-lg font-bold text-gray-800">Journey Timeline</h3>
+        </div>
         
-        <div className="relative pl-2">
+        <div className="relative pl-6">
           {/* Vertical connecting gradient line for mobile */}
-          <div className="absolute top-0 bottom-0 left-6 w-2 bg-gradient-to-b from-blue-400 via-purple-400 to-amber-400 rounded-full z-0"></div>
+          <div className="absolute top-2 bottom-0 left-6 w-2.5 bg-gradient-to-b from-blue-400 via-purple-400 to-amber-400 rounded-full z-0"></div>
 
           {/* Stages as a vertical list */}
-          <div className="space-y-8 relative z-10">
-            {timelineStages.map((stage) => {
+          <div className="space-y-10 relative z-10">
+            {timelineStages.map((stage, index) => {
               const monthNum = getMonthNumber(stage.month);
               const isCompleted = monthNum < currentProgressMonth;
               const isCurrent = monthNum === currentProgressMonth;
@@ -333,30 +369,36 @@ function TimelineView() {
               const isFirstMonth = stage.month === 1;
               const isLocked = monthNum > currentProgressMonth;
               const isAnimating = animatingStage === stage.month;
+              
+              // For mobile view transitions
+              const activeStateClasses = `transform transition-all duration-300 ${isSelected ? 'scale-105' : ''}`;
 
               return (
-                <div key={stage.month} className="flex items-start pl-6">
-                  {/* Stage Circle/Node */}
+                <div key={stage.month} className="flex items-start">
                   <button
                     onClick={() => handleStageClick(stage)}
                     disabled={isLocked && !isFirstMonth}
                     className={`
-                      relative ${stage.color} ${stage.textColor}
+                      ${stage.color} ${stage.textColor}
                       rounded-xl h-14 w-14 flex-shrink-0 flex flex-col items-center justify-center
                       font-semibold text-xs border-2 transition-all duration-300
-                      shadow-md mr-4 z-20
-                      ${isSelected ? `ring-4 ${stage.ringColor} ${stage.borderColor} scale-110 z-30` : `${stage.borderColor}`}
-                      ${isFirstMonth ? 'hover:scale-105 hover:ring-4 hover:ring-blue-300 cursor-pointer' : ''}
-                      ${isCompleted ? 'opacity-80' : ''}
-                      ${isLocked && !isFirstMonth ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
-                      ${isAnimating ? 'animate-pulse scale-110' : ''}
+                      shadow-md mr-4 z-20 relative
+                      ${isSelected ? `ring-4 ${stage.ringColor} ${stage.borderColor}` : `${stage.borderColor}`}
+                      ${isFirstMonth ? 'hover:ring-4 hover:ring-blue-300' : ''}
+                      ${isLocked && !isFirstMonth ? 'opacity-50 cursor-not-allowed' : ''}
+                      ${isAnimating ? 'animate-pulse' : ''}
                       ${isCurrent ? `border-2 ${stage.borderColor}` : ''}
                     `}
                     aria-label={isFirstMonth ? `View details for ${stage.title}` : `Select ${stage.title}`}
                   >
                     {isCompleted && (
                       <div className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5 shadow-md">
-                        <CheckCircleIcon className="w-3 h-3 text-white" />
+                        <CheckCircleIcon className="w-3.5 h-3.5 text-white" />
+                      </div>
+                    )}
+                    {isFirstMonth && isCurrent && (
+                      <div className="absolute -bottom-1.5 -right-1.5 bg-blue-600 rounded-full p-0.5 shadow-md animate-pulse">
+                        <ArrowRightCircleIcon className="w-3.5 h-3.5 text-white" />
                       </div>
                     )}
                     <div className={`${stage.iconBg} p-1.5 rounded-full mb-1 text-white shadow-sm`}>
@@ -365,19 +407,53 @@ function TimelineView() {
                     <span className="text-xs font-medium">{stage.month}</span>
                   </button>
 
-                  {/* Stage details */}
-                  <div className={`flex-1 pt-1 ${isSelected ? 'opacity-100' : 'opacity-80'}`}>
-                    <h4 className="font-medium text-sm flex items-center">
-                      {stage.title}
-                      {isCurrent && (
-                        <span className="ml-2 text-xs font-medium px-2 py-0.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-sm">Current</span>
+                  {/* Stage details - enhanced with better visual styling */}
+                  <div className={`flex-1 pt-1 ${activeStateClasses} ${isSelected ? '' : 'opacity-85'}`}>
+                    <div className="flex justify-between items-center">
+                      <h4 className={`font-medium text-sm flex items-center ${stage.textColor}`}>
+                        {stage.title}
+                        {isCurrent && (
+                          <span className="ml-2 text-xs font-medium px-2 py-0.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-sm">
+                            Current
+                          </span>
+                        )}
+                      </h4>
+                      {isFirstMonth && (
+                        <button 
+                          onClick={() => navigate('/newhire/firstmonth')} 
+                          className="text-xs text-blue-600 hover:text-blue-800"
+                          aria-label="View details"
+                        >
+                          View
+                        </button>
                       )}
-                    </h4>
-                    <p className="text-xs text-gray-600 mt-1">{stage.description}</p>
+                    </div>
+                    
+                    <p className={`text-xs text-gray-600 mt-1.5 transition-all duration-300 ${isSelected ? 'max-h-96 opacity-100' : 'max-h-24 opacity-85'}`}>
+                      {stage.description}
+                    </p>
+                    
+                    {isSelected && (
+                      <div className={`mt-2.5 bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-${stage.borderColor.split('-')[1]}-100 shadow-sm transition-all duration-500 ${isSelected ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+                        <p className="text-xs font-medium text-gray-700">
+                          {index === 0 ? "Click 'View' to see detailed information" : "More information will be available as you progress."}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Mobile Journey Progress Indicator */}
+        <div className="mt-8 flex items-center justify-center">
+          <div className="bg-white px-4 py-2 rounded-full shadow-sm border border-indigo-100 flex items-center text-sm">
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse mr-2"></div>
+            <span className="text-gray-700 text-xs">
+              <span className="font-medium">Current progress:</span> Month {currentProgressMonth} of 12
+            </span>
           </div>
         </div>
       </div>

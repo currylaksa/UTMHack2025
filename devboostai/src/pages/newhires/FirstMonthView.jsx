@@ -114,18 +114,6 @@ const chatMessages = [
     sender: 'ai',
     message: "Welcome to the team! I'm DevBoost AI, your onboarding assistant. How can I help you get started?",
     timestamp: '9:32 AM'
-  },
-  {
-    id: 'm2',
-    sender: 'user',
-    message: 'Hi! Where can I find the guide to set up my development environment?',
-    timestamp: '9:33 AM'
-  },
-  {
-    id: 'm3',
-    sender: 'ai',
-    message: 'Great question! You can find the detailed guide in the "Resources Panel" on this page, or check the "Technical Setup Guide" section right here. I can also walk you through it step-by-step if you like.',
-    timestamp: '9:33 AM'
   }
 ];
 
@@ -160,16 +148,30 @@ function FirstMonthView() {
     setMessages([...messages, newUserMessage]);
     setChatInput('');
     
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = {
-        id: `m${messages.length + 2}`,
-        sender: 'ai',
-        message: 'I can help with that! Check out the resources section for guides or let me know if you have specific questions about the setup process.',
-        timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-      };
-      setMessages(prev => [...prev, aiResponse]);
-    }, 1000);
+    // For demo: Check if the message matches our demo scenario
+    if (chatInput.toLowerCase().includes('where can i find the guide') || 
+        chatInput.toLowerCase().includes('development environment')) {
+      setTimeout(() => {
+        const demoResponse = {
+          id: `m${messages.length + 2}`,
+          sender: 'ai',
+          message: 'Great question! You can find the detailed guide in the "Resources Panel" on this page, or check the "Technical Setup Guide" section right here. I can also walk you through it step-by-step if you like.',
+          timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        };
+        setMessages(prev => [...prev, demoResponse]);
+      }, 1000);
+    } else {
+      // Default response for other messages
+      setTimeout(() => {
+        const aiResponse = {
+          id: `m${messages.length + 2}`,
+          sender: 'ai',
+          message: 'I can help with that! Check out the resources section for guides or let me know if you have specific questions about the setup process.',
+          timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        };
+        setMessages(prev => [...prev, aiResponse]);
+      }, 1000);
+    }
   };
 
   // Toggle task completion status
@@ -281,6 +283,7 @@ function FirstMonthView() {
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder="Ask anything about your onboarding..."
                   className="flex-grow rounded-l-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  style={{ paddingLeft: '16px', paddingRight: '12px', boxSizing: 'border-box' }}
                 />
                 <button
                   type="submit"
