@@ -51,10 +51,12 @@ An interactive visualization of the 12-month onboarding journey that provides:
 - Current Month Panel showing progress and task checklist
 - Quick AI Tip providing non-intrusive, contextual suggestions
 
-![New Hire Page 1](./devboostai/src/images/NewHirePage1.png)
-![New Hire Page 2](./devboostai/src/images/NewHirePage2.png)
-![New Hire Page 3](./devboostai/src/images/NewHirePage3.png)
-![New Hire Page 4](./devboostai/src/images/NewHirePage4.png)
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+  <img src="./devboostai/src/images/NewHirePage1.png" alt="New Hire Page 1" width="24%" />
+  <img src="./devboostai/src/images/NewHirePage2.png" alt="New Hire Page 2" width="24%" />
+  <img src="./devboostai/src/images/NewHirePage3.png" alt="New Hire Page 3" width="24%" />
+  <img src="./devboostai/src/images/NewHirePage4.png" alt="New Hire Page 4" width="24%" />
+</div>
 
 ### 3. First Month Experience
 A detailed view of the critical initial onboarding period featuring:
@@ -62,10 +64,12 @@ A detailed view of the critical initial onboarding period featuring:
 - AI Assistant Panel with example conversations and support
 - Resources Section with card-based layout of key documentation
 
-![First Month Experience 1](./devboostai/src/images/FirstMonthExperiencePage1.png)
-![First Month Experience 2](./devboostai/src/images/FirstMonthExperiencePage2.png)
-![First Month Experience 3](./devboostai/src/images/FirstMonthExperiencePage3.png)
-![First Month Experience 4](./devboostai/src/images/FirstMonthExperiencePage4.png)
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+  <img src="./devboostai/src/images/FirstMonthExperiencePage1.png" alt="First Month Experience 1" width="24%" />
+  <img src="./devboostai/src/images/FirstMonthExperiencePage2.png" alt="First Month Experience 2" width="24%" />
+  <img src="./devboostai/src/images/FirstMonthExperiencePage3.png" alt="First Month Experience 3" width="24%" />
+  <img src="./devboostai/src/images/FirstMonthExperiencePage4.png" alt="First Month Experience 4" width="24%" />
+</div>
 
 ### 4. Manager Dashboard
 A powerful oversight tool providing:
@@ -73,9 +77,11 @@ A powerful oversight tool providing:
 - Team Members Table with visual progress indicators and status tags
 - AI Insights Panel highlighting actionable recommendations
 
-![Manager Dashboard 1](./devboostai/src/images/ManagerDashboardPage1.png)
-![Manager Dashboard 2](./devboostai/src/images/ManagerDashboardPage2.png)
-![Manager Dashboard 3](./devboostai/src/images/ManagerDashboardPage3.png)
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+  <img src="./devboostai/src/images/ManagerDashboardPage1.png" alt="Manager Dashboard 1" width="32%" />
+  <img src="./devboostai/src/images/ManagerDashboardPage2.png" alt="Manager Dashboard 2" width="32%" />
+  <img src="./devboostai/src/images/ManagerDashboardPage3.png" alt="Manager Dashboard 3" width="32%" />
+</div>
 
 ## 🛠️ Technical Implementation
 
