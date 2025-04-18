@@ -39,11 +39,20 @@ A visually appealing introduction to the platform that features:
 - User Selection Panel with prominent buttons for "New Hire View" and "Manager View"
 - Animated Illustration showing a simplified onboarding journey with an AI assistant icon
 
+![Landing Page 1](./devboostai/src/images/LandingPage1.png)
+![Landing Page 2](./devboostai/src/images/LandingPage2.png)
+![Landing Page 3](./devboostai/src/images/LandingPage3.png)
+
 ### 2. New Hire Timeline View
 An interactive visualization of the 12-month onboarding journey that provides:
 - Horizontal Timeline with visual representation of months 1-12
 - Current Month Panel showing progress and task checklist
 - Quick AI Tip providing non-intrusive, contextual suggestions
+
+![New Hire Page 1](./devboostai/src/images/NewHirePage1.png)
+![New Hire Page 2](./devboostai/src/images/NewHirePage2.png)
+![New Hire Page 3](./devboostai/src/images/NewHirePage3.png)
+![New Hire Page 4](./devboostai/src/images/NewHirePage4.png)
 
 ### 3. First Month Experience
 A detailed view of the critical initial onboarding period featuring:
@@ -51,11 +60,20 @@ A detailed view of the critical initial onboarding period featuring:
 - AI Assistant Panel with example conversations and support
 - Resources Section with card-based layout of key documentation
 
+![First Month Experience 1](./devboostai/src/images/FirstMonthExperiencePage1.png)
+![First Month Experience 2](./devboostai/src/images/FirstMonthExperiencePage2.png)
+![First Month Experience 3](./devboostai/src/images/FirstMonthExperiencePage3.png)
+![First Month Experience 4](./devboostai/src/images/FirstMonthExperiencePage4.png)
+
 ### 4. Manager Dashboard
 A powerful oversight tool providing:
 - Team Overview Statistics showing completion rates and required actions
 - Team Members Table with visual progress indicators and status tags
 - AI Insights Panel highlighting actionable recommendations
+
+![Manager Dashboard 1](./devboostai/src/images/ManagerDashboardPage1.png)
+![Manager Dashboard 2](./devboostai/src/images/ManagerDashboardPage2.png)
+![Manager Dashboard 3](./devboostai/src/images/ManagerDashboardPage3.png)
 
 ## 🛠️ Technical Implementation
 
