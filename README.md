@@ -87,10 +87,7 @@ A powerful oversight tool providing:
 
 ### Frontend Technology Stack
 - **Framework:** React with TypeScript for robust component development
-- **Styling:** Tailwind CSS with custom color variables:
-  - Primary: blue-600 (professional, trustworthy)
-  - Secondary: teal-500 (growth, progress)
-  - Accent: indigo-400 (innovation, technology)
+- **Styling:** Tailwind CSS with custom color variables
 - **UI Components:** Chakra UI for accessible, pre-built components
 - **State Management:** Context API for streamlined state management
 - **Data Persistence:** Local Storage for prototype data persistence
