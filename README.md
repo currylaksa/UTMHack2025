@@ -39,9 +39,11 @@ A visually appealing introduction to the platform that features:
 - User Selection Panel with prominent buttons for "New Hire View" and "Manager View"
 - Animated Illustration showing a simplified onboarding journey with an AI assistant icon
 
-![Landing Page 1](./devboostai/src/images/LandingPage1.png)
-![Landing Page 2](./devboostai/src/images/LandingPage2.png)
-![Landing Page 3](./devboostai/src/images/LandingPage3.png)
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+  <img src="./devboostai/src/images/LandingPage1.png" alt="Landing Page 1" width="32%" />
+  <img src="./devboostai/src/images/LandingPage2.png" alt="Landing Page 2" width="32%" />
+  <img src="./devboostai/src/images/LandingPage3.png" alt="Landing Page 3" width="32%" />
+</div>
 
 ### 2. New Hire Timeline View
 An interactive visualization of the 12-month onboarding journey that provides:
