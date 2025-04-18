@@ -17,7 +17,7 @@ const Footer = () => {
           {/* GitHub Link */}
           <div className="flex items-center space-x-4">
             <a
-              href="https://github.com/your-repo-link"
+              href="https://github.com/currylaksa/UTMHack2025"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-white transition-colors duration-200 flex items-center space-x-2"
