@@ -14,7 +14,7 @@ This repository contains the frontend prototype developed for the UTM Hackathon 
 ## 🔗 Project Links
 
 * **Proposal:** [Click Here](https://docs.google.com/document/d/1QoBZJ26CvayosYuX8hdKs15RLFReUwN_9j6miNflpmc/edit?usp=sharing)
-* **Poster:** [Click Here]() Will be update soon
+* **Poster:** [Click Here](https://www.canva.com/design/DAGlCWY2tY4/8IfRjKVJ-RhuMCkiWC_ODg/view?utm_content=DAGlCWY2tY4&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hfb5a4b6692)
 * **Demo Video:** [Click Here](https://youtu.be/SBqlChJOChk)
 *  **Webiste:** [Click Here](https://utm-hack2025-xv91.vercel.app/)
 
