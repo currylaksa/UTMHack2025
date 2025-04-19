@@ -67,7 +67,7 @@ function LandingPage() {
   // Memoize the user cards data
   const userCards = useMemo(() => [
     {
-      to: "/new-hire",
+      to: "/newhire",
       iconBgColor: "blue-500",
       title: "New Engineers",
       description: "Navigate your onboarding journey with personalized AI guidance and resources",
@@ -136,7 +136,7 @@ function LandingPage() {
               variants={fadeInUp}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Link to="/new-hire" className="bg-white text-blue-600 font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-blue-50 transition-all duration-300 text-center group">
+              <Link to="/newhire" className="bg-white text-blue-600 font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-blue-50 transition-all duration-300 text-center group">
                 New Hire View
                 <span className="inline-block transition-transform duration-300 group-hover:translate-x-1 ml-1">→</span>
               </Link>
