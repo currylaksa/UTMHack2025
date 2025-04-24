@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useEmotion } from '../../services/EmotionContext';
 import { 
   CheckCircleIcon, 
   ChatBubbleLeftRightIcon, 
@@ -201,6 +202,9 @@ function TimelineView() {
   const [aiLearnProgress, setAiLearnProgress] = useState(25); // AI learning progress percentage
   const [contextTransition, setContextTransition] = useState(false); // For smooth transitions
   
+  // Add emotion context
+  const { currentEmotion, emotionIntensity, processUserInput, getContentAdaptation } = useEmotion();
+  
   const navigate = useNavigate();
 
   const selectedStage = timelineStages.find(s => s.month === selectedMonthIdentifier);
@@ -227,11 +231,90 @@ function TimelineView() {
     }
   }, [selectedMonthIdentifier]);
 
+  // Process user input through emotion detection when questions are asked
+  useEffect(() => {
+    const lastUserMessage = aiConversation.find(msg => msg.type === 'user');
+    if (lastUserMessage) {
+      // Process the message through emotion detection
+      processUserInput(lastUserMessage.message);
+    }
+  }, [aiConversation, processUserInput]);
+  
+  // Adapt content based on detected emotion
+  const contentAdaptation = getContentAdaptation();
+  
+  // Get color classes based on current emotion to enhance UI
+  const getEmotionStyleClasses = () => {
+    switch(currentEmotion) {
+      case 'frustrated':
+        return {
+          bg: 'bg-red-50',
+          border: 'border-red-200',
+          text: 'text-red-800',
+          buttonBg: 'bg-red-100 hover:bg-red-200',
+          buttonText: 'text-red-700'
+        };
+      case 'confused':
+        return {
+          bg: 'bg-purple-50',
+          border: 'border-purple-200',
+          text: 'text-purple-800',
+          buttonBg: 'bg-purple-100 hover:bg-purple-200',
+          buttonText: 'text-purple-700'
+        };
+      case 'excited':
+        return {
+          bg: 'bg-green-50',
+          border: 'border-green-200',
+          text: 'text-green-800',
+          buttonBg: 'bg-green-100 hover:bg-green-200',
+          buttonText: 'text-green-700'
+        };
+      case 'bored':
+        return {
+          bg: 'bg-yellow-50',
+          border: 'border-yellow-200',
+          text: 'text-yellow-800',
+          buttonBg: 'bg-yellow-100 hover:bg-yellow-200',
+          buttonText: 'text-yellow-700'
+        };
+      case 'anxious':
+        return {
+          bg: 'bg-amber-50',
+          border: 'border-amber-200',
+          text: 'text-amber-800',
+          buttonBg: 'bg-amber-100 hover:bg-amber-200',
+          buttonText: 'text-amber-700'
+        };
+      case 'interested':
+        return {
+          bg: 'bg-blue-50',
+          border: 'border-blue-200',
+          text: 'text-blue-800',
+          buttonBg: 'bg-blue-100 hover:bg-blue-200',
+          buttonText: 'text-blue-700'
+        };
+      default: // neutral
+        return {
+          bg: 'bg-gray-50',
+          border: 'border-gray-200',
+          text: 'text-gray-800',
+          buttonBg: 'bg-gray-100 hover:bg-gray-200',
+          buttonText: 'text-gray-700'
+        };
+    }
+  };
+
   const getResourceIcon = (type) => {
     switch (type) {
-      case 'document': return <DocumentTextIcon className="w-5 h-5 mr-2 text-blue-500 flex-shrink-0" />;
-      case 'video': return <VideoCameraIcon className="w-5 h-5 mr-2 text-purple-500 flex-shrink-0" />;
-      default: return <DocumentTextIcon className="w-5 h-5 mr-2 text-gray-500 flex-shrink-0" />;
+      case 'document':
+        return <DocumentTextIcon className="h-5 w-5 text-blue-600" />;
+      case 'video':
+        return <VideoCameraIcon className="h-5 w-5 text-red-600" />;
+      case 'chat':
+        return <ChatBubbleLeftRightIcon className="h-5 w-5 text-green-600" />;
+      default:
+        return <DocumentTextIcon className="h-5 w-5 text-gray-600" />;
     }
   };
 
@@ -241,14 +324,8 @@ function TimelineView() {
     
     // Delay action to allow animation to be visible
     setTimeout(() => {
+      setSelectedMonthIdentifier(stage.month);
       setAnimatingStage(null);
-      
-      if (stage.month === 1) {
-        navigate('/newhire/firstmonth'); 
-      } else {
-        // Trigger transition effect
-        setSelectedMonthIdentifier(stage.month);
-      }
     }, 300);
   };
   
@@ -264,837 +341,874 @@ function TimelineView() {
       timestamp: new Date().toLocaleTimeString()
     };
     
-    setAiConversation(prev => [...prev, newUserMessage]);
-    setAiIsThinking(true);
+    setAiConversation([...aiConversation, newUserMessage]);
     setUserQuestion('');
+    setAiIsThinking(true);
     
-    // Simulate AI response based on context
+    // Process user input through emotion detection
+    processUserInput(userQuestion);
+    
+    // Simulate AI thinking and response
     setTimeout(() => {
-      let aiResponse;
+      setAiIsThinking(false);
       
-      if (userQuestion.toLowerCase().includes('setup') || userQuestion.toLowerCase().includes('environment')) {
+      let aiResponse;
+      // Generate contextual response based on user question and current emotion
+      if (userQuestion.toLowerCase().includes('difficult') || userQuestion.toLowerCase().includes('hard') || userQuestion.toLowerCase().includes('confused')) {
         aiResponse = {
           type: 'ai',
-          message: `For ${selectedStage.knowledgeDomain} setup, I recommend starting with the "${resources[0]?.title || 'Dev Environment Setup Guide'}". Would you like me to guide you through the process step by step?`,
+          message: `I notice you might be feeling a bit ${currentEmotion}. Let me break this down more simply. ${getContentAdaptationResponse()}`,
           timestamp: new Date().toLocaleTimeString()
         };
-      } else if (userQuestion.toLowerCase().includes('team') || userQuestion.toLowerCase().includes('help')) {
-        const expertName = relevantTeamMembers[0]?.name || 'Sarah Chen';
+      } else if (userQuestion.toLowerCase().includes('excited') || userQuestion.toLowerCase().includes('interesting')) {
         aiResponse = {
           type: 'ai',
-          message: `For questions about ${selectedStage.knowledgeDomain}, ${expertName} would be your best contact. I've highlighted their information in the "Team Experts" section. Would you like me to facilitate an introduction?`,
+          message: `I can see you're enthusiastic about this! ${getContentAdaptationResponse()}`,
           timestamp: new Date().toLocaleTimeString()
         };
       } else {
         aiResponse = {
           type: 'ai',
-          message: `During ${selectedStage.title}, you should focus on ${selectedStage.knowledgeDomain}. I've curated the most relevant resources and tasks for this stage in your journey.`,
+          message: getContextualResponse(userQuestion),
           timestamp: new Date().toLocaleTimeString()
         };
       }
       
-      // Add AI response to conversation
       setAiConversation(prev => [...prev, aiResponse]);
-      setAiIsThinking(false);
       
-      // Simulate AI learning from interaction
-      setAiLearnProgress(prev => Math.min(prev + 5, 100));
+      // Increase AI learning progress
+      setAiLearnProgress(prev => Math.min(prev + Math.random() * 10, 100));
     }, 1500);
   };
+  
+  // Get adaptive response based on emotional state
+  const getContentAdaptationResponse = () => {
+    // Use the adaptation suggestions based on current emotion
+    const adaptation = getContentAdaptation();
+    return adaptation.suggestions[Math.floor(Math.random() * adaptation.suggestions.length)];
+  };
+  
+  // Get contextual response based on user question
+  const getContextualResponse = (question) => {
+    const keywords = {
+      timeline: "Your onboarding journey is divided into multiple phases over your first year. We're currently focusing on month 1 to help you get set up properly.",
+      mentor: "Your mentor will be assigned in month 2. You'll have regular 1:1 sessions to help guide your learning and integration.",
+      setup: "For development environment setup, check out the 'Dev Environment Setup Guide' in your resources tab. I can walk you through it step by step.",
+      training: "We have various training modules available. In month 1, focus on the company introduction and basic environment setup. More technical training comes in month 2.",
+      team: "You'll meet your team members gradually. There's a team introduction meeting scheduled - you can find it in your tasks section for month 1.",
+      goals: "Goal setting happens throughout your journey. Initial goals will be set with your manager in month 2 after you've gotten familiar with the basics."
+    };
+    
+    // Find matching keywords
+    for (const [key, response] of Object.entries(keywords)) {
+      if (question.toLowerCase().includes(key)) {
+        return response;
+      }
+    }
+    
+    // Default response
+    return "I'm here to help with any questions about your onboarding journey. Feel free to ask about your timeline, tasks, resources, team members, or anything else you're curious about.";
+  };
+  
+  // Determine content pacing based on emotional state
+  const getContentPacing = () => {
+    const adaptation = getContentAdaptation();
+    return adaptation.pacing;
+  };
+  
+  const emotionStyles = getEmotionStyleClasses();
 
   return (
     <div className="space-y-8">
-      {/* Header Card */}
-      <div className={`bg-gradient-to-br from-white via-white to-blue-50 p-6 rounded-xl shadow-lg border border-blue-100 relative overflow-hidden transition-all duration-700 ${animateHeader ? 'transform-none opacity-100' : 'transform translate-y-4 opacity-0'}`}>
-        <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full opacity-70 blur-xl"></div>
-        <div className="absolute -bottom-24 -left-16 w-64 h-64 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-full opacity-70 blur-xl"></div>
-        
-        {/* Small decorative elements */}
-        <div className="absolute top-10 right-10 w-8 h-8 bg-yellow-300 rounded-full opacity-20"></div>
-        <div className="absolute bottom-16 left-32 w-6 h-6 bg-pink-300 rounded-full opacity-20"></div>
-        <div className="absolute top-24 left-12 w-4 h-4 bg-purple-300 rounded-full opacity-30"></div>
-        
-        <div className="relative">
-          <div className="flex items-center mb-4">
-            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-xl shadow-md mr-4">
-              <SparklesIcon className="h-6 w-6 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-800">Your 12-Month Onboarding Journey</h2>
-          </div>
-          <p className="text-gray-600 mb-6 ml-16">Track your progress and discover what's ahead in your personalized onboarding path.</p>
+      {/* Timeline header with emotion-adaptive styling */}
+      <div className={`rounded-xl shadow-md overflow-hidden border ${emotionStyles.border} transition-all duration-300 ${
+        animateHeader ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+      }`}>
+        <div className={`px-6 py-5 ${emotionStyles.bg}`}>
+          <h1 className={`text-xl sm:text-2xl font-bold ${emotionStyles.text}`}>Your Onboarding Journey</h1>
+          <p className="text-gray-600 mt-2">
+            Track your progress through the onboarding process with personalized guidance
+          </p>
           
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl shadow-sm border border-blue-200">
-              <div className="flex items-center mb-2">
-                <div className="bg-blue-600 p-1.5 rounded-lg">
-                  <CalendarIcon className="h-4 w-4 text-white" />
-                </div>
-                <div className="ml-2 text-sm text-blue-700 font-medium">Current Month</div>
-              </div>
-              <div className="ml-9 text-xl font-bold text-blue-800">Month 1</div>
+          {contentAdaptation.pacing === 'slower' && (
+            <div className="mt-3 px-3 py-2 bg-blue-50 rounded-lg border border-blue-100 flex items-start">
+              <LightBulbIcon className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-blue-700">
+                <span className="font-medium">Tip:</span> We're breaking this down into smaller pieces to make it easier to follow. Take your time exploring each section.
+              </p>
             </div>
-            
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl shadow-sm border border-green-200">
-              <div className="flex items-center mb-2">
-                <div className="bg-green-600 p-1.5 rounded-lg">
-                  <CheckCircleIcon className="h-4 w-4 text-white" />
-                </div>
-                <div className="ml-2 text-sm text-green-700 font-medium">Tasks Completed</div>
-              </div>
-              <div className="ml-9 text-xl font-bold text-green-800">33%</div>
+          )}
+          
+          {contentAdaptation.pacing === 'faster' && (
+            <div className="mt-3 px-3 py-2 bg-indigo-50 rounded-lg border border-indigo-100 flex items-start">
+              <SparklesIcon className="h-5 w-5 text-indigo-500 mr-2 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-indigo-700">
+                <span className="font-medium">Challenge:</span> Ready to move faster? You can jump ahead to explore upcoming months or dive deeper into advanced topics.
+              </p>
             </div>
-            
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl shadow-sm border border-purple-200">
-              <div className="flex items-center mb-2">
-                <div className="bg-purple-600 p-1.5 rounded-lg">
-                  <UserGroupIcon className="h-4 w-4 text-white" />
-                </div>
-                <div className="ml-2 text-sm text-purple-700 font-medium">Next Milestone</div>
-              </div>
-              <div className="ml-9 text-xl font-bold text-purple-800">Team Intro</div>
-            </div>
-            
-            <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-xl shadow-sm border border-amber-200">
-              <div className="flex items-center mb-2">
-                <div className="bg-amber-600 p-1.5 rounded-lg">
-                  <DocumentTextIcon className="h-4 w-4 text-white" />
-                </div>
-                <div className="ml-2 text-sm text-amber-700 font-medium">Resources</div>
-              </div>
-              <div className="ml-9 text-xl font-bold text-amber-800">2 New</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Timeline Visualization - Desktop View (hidden on mobile) */}
-      <div className="bg-gradient-to-br from-white to-indigo-50 p-8 rounded-xl shadow-lg border border-indigo-100 hidden md:block">
-        <div className="flex items-center mb-6">
-          <div className="bg-indigo-100 p-2 rounded-lg">
-            <CalendarIcon className="h-6 w-6 text-indigo-600" />
-          </div>
-          <h3 className="ml-3 text-xl font-bold text-gray-800">Journey Timeline</h3>
+          )}
         </div>
         
-        {/* Redesigned timeline with clearer labels and spacing */}
-        <div className="relative px-4 py-12">
-          {/* Connecting Line with gradient - now thinner for better aesthetics */}
-          <div className="absolute top-1/2 left-0 right-0 h-2 bg-gradient-to-r from-blue-400 via-purple-500 to-amber-500 transform -translate-y-1/2 z-0 rounded-full shadow-sm"></div>
-
-          {/* Stages */}
-          <div className="relative flex justify-between z-10">
-            {timelineStages.map((stage, index) => {
-              const monthNum = getMonthNumber(stage.month);
-              const isCompleted = monthNum < currentProgressMonth;
-              const isCurrent = monthNum === currentProgressMonth;
-              const isSelected = stage.month === selectedMonthIdentifier;
-              const isFirstMonth = stage.month === 1;
-              const isLocked = monthNum > currentProgressMonth;
-              const isAnimating = animatingStage === stage.month;
-
+        {/* Timeline Stages Visualization */}
+        <div className="h-1 w-full bg-gray-200">
+          <div className="h-full bg-blue-500" style={{ width: `${15}%` }}></div>
+        </div>
+        
+        <div className="w-full overflow-x-auto whitespace-nowrap px-6 pt-4 pb-2 bg-white">
+          <div className="inline-flex items-center min-w-max">
+            {timelineStages.map((stage, i) => {
+              const isSelected = selectedMonthIdentifier === stage.month;
+              const isCompleted = currentProgressMonth > getMonthNumber(stage.month);
+              const isLocked = getMonthNumber(stage.month) > currentProgressMonth + 1;
+              const canClick = !isLocked;
+              
               return (
-                <div key={stage.month} className="relative flex flex-col items-center">
-                  {/* Knowledge domain label - now positioned better */}
-                  <div className={`absolute -top-14 left-1/2 transform -translate-x-1/2 
-                    text-xs px-3 py-1 rounded-full ${stage.domainColor} text-white font-medium
-                    whitespace-nowrap transition-all duration-300
-                    ${(isSelected || isCurrent) ? 'opacity-100' : 'opacity-70'}`}
-                  >
-                    {stage.knowledgeDomain}
-                  </div>
-                  
-                  {/* Month label */}
-                  <div className={`absolute -top-5 left-1/2 transform -translate-x-1/2
-                    text-sm font-medium px-2 py-0.5 bg-white rounded-full shadow-sm border border-gray-100
-                    ${stage.textColor} transition-all duration-300 whitespace-nowrap`}
-                  >
-                    {stage.title}
-                  </div>
-
-                  {/* Stage Circle/Node - now cleaner design */}
+                <div key={i} className="px-1.5 first:pl-0 last:pr-0">
                   <button
-                    onClick={() => handleStageClick(stage)}
-                    disabled={isLocked && !isFirstMonth}
-                    className={`
-                      relative ${stage.color} ${stage.textColor}
-                      rounded-xl h-20 w-20 flex flex-col items-center justify-center
-                      font-semibold text-sm border-2 transform transition-all duration-300
-                      shadow-md hover:shadow-lg
-                      ${isSelected ? `ring-4 ${stage.ringColor} ${stage.borderColor} scale-110 z-30` : `${stage.borderColor}`}
-                      ${isFirstMonth ? 'hover:scale-110 hover:ring-4 hover:ring-blue-300 cursor-pointer' : ''}
-                      ${isCompleted ? 'bg-opacity-90' : ''}
-                      ${isLocked && !isFirstMonth ? 'opacity-60 cursor-not-allowed filter grayscale-[30%]' : 'hover:scale-110'}
-                      ${isAnimating ? 'animate-pulse scale-125' : ''}
-                      ${isCurrent ? `border-2 ${stage.borderColor}` : ''}
-                      overflow-hidden
-                    `}
-                    style={{ 
-                      boxShadow: isSelected ? `0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1), 0 0 0 2px ${stage.borderColor}` : '' 
-                    }}
-                    aria-label={isFirstMonth ? `View details for ${stage.title}` : `Select ${stage.title}`}
+                    className={`group relative rounded-full py-3 px-5 ${stage.color} border ${stage.borderColor} ${
+                      isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'
+                    } ${
+                      isSelected ? `${stage.ringColor} ring-2 ring-offset-2 shadow-md` : ''
+                    } ${
+                      animatingStage === stage.month ? 'animate-pulse' : ''
+                    } transition-all focus:outline-none min-w-[150px]`}
+                    onClick={() => canClick && handleStageClick(stage)}
+                    disabled={isLocked}
                   >
-                    {/* NEW: Lock icon for locked months */}
-                    {isLocked && !isFirstMonth && (
-                      <div className="absolute inset-0 bg-gray-50/50 backdrop-blur-[1px] flex items-center justify-center z-30">
-                        <div className="bg-gray-200/80 p-1.5 rounded-full">
-                          <LockClosedIcon className="w-5 h-5 text-gray-600" />
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Circular progress indicator */}
-                    {stage.progress > 0 && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <svg className="w-20 h-20 absolute" viewBox="0 0 100 100">
-                          <circle 
-                            cx="50" 
-                            cy="50" 
-                            r="46" 
-                            fill="none" 
-                            stroke="rgba(255,255,255,0.3)" 
-                            strokeWidth="8" 
-                          />
-                          <circle 
-                            cx="50" 
-                            cy="50" 
-                            r="46" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeOpacity="0.6"
-                            strokeWidth="8" 
-                            strokeLinecap="round"
-                            strokeDasharray="289.03"
-                            strokeDashoffset={289.03 - (289.03 * stage.progress / 100)}
-                            transform="rotate(-90 50 50)"
-                          />
-                        </svg>
-                      </div>
-                    )}
-
-                    {isCompleted && (
-                      <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1 shadow-lg z-10">
-                        <CheckCircleIcon className="w-4 h-4 text-white" />
-                      </div>
-                    )}
-                    
-                    {isFirstMonth && isCurrent && (
-                      <div className="absolute -bottom-1 -right-1 bg-blue-600 rounded-full p-1 shadow-lg animate-pulse z-10">
-                        <ArrowRightCircleIcon className="w-4 h-4 text-white" />
-                      </div>
-                    )}
-
-                    <div className="flex flex-col items-center z-10">
-                      <div className={`${stage.iconBg} p-2 rounded-full mb-1 text-white shadow-sm flex items-center justify-center`}>
+                    <div className="flex items-center space-x-2">
+                      <div className={`rounded-full p-2 ${stage.iconBg} text-white`}>
                         {stage.icon}
                       </div>
-                      <span className="font-bold text-base">{typeof stage.month === 'number' ? stage.month : stage.month.split(' ')[0]}</span>
-                      {stage.progress > 0 && (
-                        <span className="text-xs font-medium">{stage.progress}%</span>
-                      )}
-                    </div>
-                  </button>
-
-                  {/* Month information displayed below - clear format for month ranges */}
-                  <div className="absolute top-full pt-3 left-1/2 transform -translate-x-1/2 text-center">
-                    <span className="text-xs inline-block px-2 py-1 bg-white rounded-lg shadow-sm text-gray-600 whitespace-nowrap">
-                      {typeof stage.month === 'string' && stage.month.includes('&') ? 
-                        stage.month.replace('&', '-') : 
-                        `Month ${stage.month}`}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Journey Progress Indicator */}
-        <div className="mt-20 flex items-center justify-center">
-          <div className="bg-white px-4 py-2 rounded-full shadow-sm border border-indigo-100 flex items-center text-sm">
-            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse mr-2"></div>
-            <span className="text-gray-700">
-              <span className="font-medium">Current progress:</span> Month {currentProgressMonth} of 12
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Timeline Visualization - Mobile View (shown only on mobile) */}
-      <div className="bg-gradient-to-br from-white to-indigo-50 p-5 rounded-xl shadow-lg border border-indigo-100 md:hidden">
-        <div className="flex items-center mb-6">
-          <div className="bg-indigo-100 p-2 rounded-lg">
-            <CalendarIcon className="h-5 w-5 text-indigo-600" />
-          </div>
-          <h3 className="ml-3 text-lg font-bold text-gray-800">Journey Timeline</h3>
-        </div>
-        
-        <div className="relative pl-6">
-          {/* Vertical connecting gradient line for mobile */}
-          <div className="absolute top-2 bottom-0 left-6 w-2.5 bg-gradient-to-b from-blue-400 via-purple-400 to-amber-400 rounded-full z-0"></div>
-
-          {/* Stages as a vertical list */}
-          <div className="space-y-10 relative z-10">
-            {timelineStages.map((stage, index) => {
-              const monthNum = getMonthNumber(stage.month);
-              const isCompleted = monthNum < currentProgressMonth;
-              const isCurrent = monthNum === currentProgressMonth;
-              const isSelected = stage.month === selectedMonthIdentifier;
-              const isFirstMonth = stage.month === 1;
-              const isLocked = monthNum > currentProgressMonth;
-              const isAnimating = animatingStage === stage.month;
-              
-              // For mobile view transitions
-              const activeStateClasses = `transform transition-all duration-300 ${isSelected ? 'scale-105' : ''}`;
-
-              return (
-                <div key={stage.month} className="flex items-start">
-                  <button
-                    onClick={() => handleStageClick(stage)}
-                    disabled={isLocked && !isFirstMonth}
-                    className={`
-                      ${stage.color} ${stage.textColor}
-                      rounded-xl h-14 w-14 flex-shrink-0 flex flex-col items-center justify-center
-                      font-semibold text-xs border-2 transition-all duration-300
-                      shadow-md mr-4 z-20 relative
-                      ${isSelected ? `ring-4 ${stage.ringColor} ${stage.borderColor}` : `${stage.borderColor}`}
-                      ${isFirstMonth ? 'hover:ring-4 hover:ring-blue-300' : ''}
-                      ${isLocked && !isFirstMonth ? 'opacity-50 cursor-not-allowed' : ''}
-                      ${isAnimating ? 'animate-pulse' : ''}
-                      ${isCurrent ? `border-2 ${stage.borderColor}` : ''}
-                    `}
-                    aria-label={isFirstMonth ? `View details for ${stage.title}` : `Select ${stage.title}`}
-                  >
-                    {/* NEW: Lock icon for locked months */}
-                    {isLocked && !isFirstMonth && (
-                      <div className="absolute inset-0 bg-gray-50/50 backdrop-blur-[1px] flex items-center justify-center z-30">
-                        <div className="bg-gray-200/80 p-1.5 rounded-full">
-                          <LockClosedIcon className="w-5 h-5 text-gray-600" />
+                      <div className="text-left">
+                        <p className={`font-bold text-sm ${stage.textColor}`}>{stage.title}</p>
+                        
+                        <div className="flex items-center mt-1">
+                          {isLocked ? (
+                            <LockClosedIcon className="h-4 w-4 text-gray-500 mr-1" />
+                          ) : (
+                            <>
+                              {isCompleted ? (
+                                <CheckCircleIcon className="h-4 w-4 text-green-500 mr-1" />
+                              ) : (
+                                <div className="h-3 w-3 rounded-full bg-white border border-gray-300 mr-1"></div>
+                              )}
+                            </>
+                          )}
+                          <div className="text-xs text-gray-600">
+                            {stage.progress > 0 ? `${stage.progress}% complete` : isLocked ? 'Locked' : 'Not started'}
+                          </div>
                         </div>
                       </div>
-                    )}
-                    
-                    {isCompleted && (
-                      <div className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5 shadow-md">
-                        <CheckCircleIcon className="w-3.5 h-3.5 text-white" />
-                      </div>
-                    )}
-                    {isFirstMonth && isCurrent && (
-                      <div className="absolute -bottom-1.5 -right-1.5 bg-blue-600 rounded-full p-0.5 shadow-md animate-pulse">
-                        <ArrowRightCircleIcon className="w-3.5 h-3.5 text-white" />
-                      </div>
-                    )}
-                    <div className={`${stage.iconBg} p-1.5 rounded-full mb-1 text-white shadow-sm`}>
-                      {stage.icon}
                     </div>
-                    <span className="text-xs font-medium">{stage.month}</span>
                   </button>
-
-                  {/* Stage details - enhanced with better visual styling */}
-                  <div className={`flex-1 pt-1 ${activeStateClasses} ${isSelected ? '' : 'opacity-85'}`}>
-                    <div className="flex justify-between items-center">
-                      <h4 className={`font-medium text-sm flex items-center ${stage.textColor}`}>
-                        {stage.title}
-                        {isCurrent && (
-                          <span className="ml-2 text-xs font-medium px-2 py-0.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-sm">
-                            Current
-                          </span>
-                        )}
-                      </h4>
-                      {isFirstMonth && (
-                        <button 
-                          onClick={() => navigate('/newhire/firstmonth')} 
-                          className="text-xs text-blue-600 hover:text-blue-800"
-                          aria-label="View details"
-                        >
-                          View
-                        </button>
-                      )}
-                    </div>
-                    
-                    <p className={`text-xs text-gray-600 mt-1.5 transition-all duration-300 ${isSelected ? 'max-h-96 opacity-100' : 'max-h-24 opacity-85'}`}>
-                      {stage.description}
-                    </p>
-                    
-                    {isSelected && (
-                      <div className={`mt-2.5 bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-${stage.borderColor.split('-')[1]}-100 shadow-sm transition-all duration-500 ${isSelected ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-                        <p className="text-xs font-medium text-gray-700">
-                          {index === 0 ? "Click 'View' to see detailed information" : "More information will be available as you progress."}
-                        </p>
-                      </div>
-                    )}
-                  </div>
                 </div>
               );
             })}
           </div>
         </div>
-
-        {/* Mobile Journey Progress Indicator */}
-        <div className="mt-8 flex items-center justify-center">
-          <div className="bg-white px-4 py-2 rounded-full shadow-sm border border-indigo-100 flex items-center text-sm">
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse mr-2"></div>
-            <span className="text-gray-700 text-xs">
-              <span className="font-medium">Current progress:</span> Month {currentProgressMonth} of 12
-            </span>
-          </div>
-        </div>
       </div>
-
-      {/* Selected Stage Details - NEW CONTEXT SWITCHING PANEL */}
-      {selectedStage && (
-        <div className={`bg-gradient-to-br from-white to-blue-50 p-6 rounded-xl shadow-lg border border-blue-100 transition-all duration-300 ${contextTransition ? 'opacity-0' : 'opacity-100'}`}>
-          <div className="flex items-center mb-6">
-            <div className={`${selectedStage.iconBg} p-3 rounded-xl text-white shadow-md mr-4`}>
-              {selectedStage.icon}
-            </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center">
-                Focus for: {selectedStage.title}
-                <span className={`ml-3 ${selectedStage.domainColor} text-white text-xs px-2 py-1 rounded-full`}>
+      
+      {/* Content Panels - Adaptive to emotion */}
+      <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 transition-opacity duration-300 ${contextTransition ? 'opacity-0' : 'opacity-100'}`}>
+        {/* Left Panel - Month details - Adapted based on emotion */}
+        <div className={`md:col-span-2 rounded-xl shadow-md border ${emotionStyles.border} overflow-hidden`}>
+          <div className={`px-6 py-4 ${selectedStage.color} border-b ${selectedStage.borderColor}`}>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <div className={`rounded-full p-2 ${selectedStage.iconBg} text-white mr-3`}>
+                  {selectedStage.icon}
+                </div>
+                <div>
+                  <h2 className={`text-xl font-bold ${selectedStage.textColor}`}>{selectedStage.title}</h2>
+                  <p className="text-gray-700 text-sm mt-1">{selectedStage.description}</p>
+                </div>
+              </div>
+              <div className="hidden md:block">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${selectedStage.domainColor} text-white`}>
                   {selectedStage.knowledgeDomain}
                 </span>
-              </h3>
-              <p className="text-gray-600 mt-1">{selectedStage.description}</p>
+              </div>
             </div>
           </div>
-
-          {/* Context-Switching Tabs */}
-          <div className="flex border-b border-gray-200 mb-6">
-            <button 
-              className={`px-6 py-3 font-medium text-sm -mb-px ${activeTab === 'overview' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-              onClick={() => setActiveTab('overview')}
-            >
-              Overview
-            </button>
-            <button 
-              className={`px-6 py-3 font-medium text-sm -mb-px ${activeTab === 'resources' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-              onClick={() => setActiveTab('resources')}
-            >
-              Resources
-            </button>
-            <button 
-              className={`px-6 py-3 font-medium text-sm -mb-px ${activeTab === 'experts' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-              onClick={() => setActiveTab('experts')}
-            >
-              Team Experts
-            </button>
-            <button 
-              className={`px-6 py-3 font-medium text-sm -mb-px ${activeTab === 'ai' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-              onClick={() => setActiveTab('ai')}
-            >
-              AI Assistant
-            </button>
+          
+          {/* Tab Navigation - simplified for focus if confused/frustrated */}
+          <div className="px-6 pt-4 bg-white">
+            <div className="flex space-x-1 border-b border-gray-200">
+              <button
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
+                  activeTab === 'overview' 
+                    ? `border-b-2 ${selectedStage.textColor} border-blue-500` 
+                    : 'text-gray-500 hover:text-gray-700'
+                } transition-colors focus:outline-none`}
+                onClick={() => setActiveTab('overview')}
+              >
+                Overview
+              </button>
+              
+              <button
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
+                  activeTab === 'tasks' 
+                    ? `border-b-2 ${selectedStage.textColor} border-blue-500` 
+                    : 'text-gray-500 hover:text-gray-700'
+                } transition-colors focus:outline-none`}
+                onClick={() => setActiveTab('tasks')}
+              >
+                Tasks
+              </button>
+              
+              <button
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
+                  activeTab === 'resources' 
+                    ? `border-b-2 ${selectedStage.textColor} border-blue-500` 
+                    : 'text-gray-500 hover:text-gray-700'
+                } transition-colors focus:outline-none`}
+                onClick={() => setActiveTab('resources')}
+              >
+                Resources
+              </button>
+              
+              {/* Only show team tab if not in a confused or frustrated state */}
+              {currentEmotion !== 'confused' && currentEmotion !== 'frustrated' && (
+                <button
+                  className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
+                    activeTab === 'team' 
+                      ? `border-b-2 ${selectedStage.textColor} border-blue-500` 
+                      : 'text-gray-500 hover:text-gray-700'
+                  } transition-colors focus:outline-none`}
+                  onClick={() => setActiveTab('team')}
+                >
+                  Team
+                </button>
+              )}
+            </div>
           </div>
-
-          {/* Tab Content with AnimatePresence for smooth transitions */}
-          <AnimatePresence mode="wait">
+          
+          {/* Tab Content Areas - Modified based on emotion */}
+          <div className="p-6 bg-white">
             {/* Overview Tab */}
             {activeTab === 'overview' && (
-              <motion.div 
-                key="overview"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4"
-              >
-                {/* Tasks */}
-                <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-5 rounded-xl border border-blue-100 shadow-md">
-                  <h4 className="font-semibold mb-5 text-gray-800 flex items-center">
-                    <div className="bg-blue-600 p-1.5 rounded-lg mr-2">
-                      <CheckCircleIcon className="w-4 h-4 text-white" />
+              <div className="space-y-4">
+                <div className={`p-4 rounded-lg ${emotionStyles.bg} border ${emotionStyles.border}`}>
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <LightBulbIcon className="h-5 w-5 text-yellow-500" />
                     </div>
-                    Key Tasks
-                  </h4>
-                  {tasks.length > 0 ? (
-                    <ul className="space-y-4">
-                      {tasks.map(task => (
-                        <li key={task.id} className="flex items-center text-sm bg-white p-3 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md">
-                          <input
-                            type="checkbox"
-                            className="mr-3 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                            checked={task.completed}
-                            readOnly
-                          />
-                          <span className={`${task.completed ? 'line-through text-gray-500' : 'text-gray-800'} transition-all duration-200`}>
-                            {task.title}
-                          </span>
+                    <div className="ml-3">
+                      <p className="text-sm text-gray-700">{aiTip}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Simplified view for confused/frustrated users */}
+                {(currentEmotion === 'confused' || currentEmotion === 'frustrated') ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-700">
+                      This is a simplified overview of what you'll focus on during this month:
+                    </p>
+                    <ul className="space-y-2">
+                      {tasks.map((task, i) => (
+                        <li key={i} className="flex items-start">
+                          <div className="flex-shrink-0 mt-0.5">
+                            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
+                              <span className="text-xs font-medium text-blue-700">{i+1}</span>
+                            </div>
+                          </div>
+                          <span className="ml-2 text-sm text-gray-700">{task.title}</span>
                         </li>
                       ))}
                     </ul>
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">No specific tasks listed for this period yet.</p>
-                  )}
-                </div>
-
-                {/* AI Tip Section */}
-                {aiTip && (
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl shadow-md p-5">
-                    <h4 className="font-semibold mb-5 text-gray-800 flex items-center">
-                      <div className="bg-indigo-600 p-1.5 rounded-lg mr-2">
-                        <LightBulbIcon className="w-4 h-4 text-white" />
+                    
+                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 mt-4">
+                      <p className="text-sm text-blue-700">
+                        <span className="font-medium">Need help?</span> Take each step one at a time. 
+                        Feel free to ask questions about any specific task, and I'll provide more detailed instructions.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  /* More comprehensive view for other emotional states */
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-3">Month {getMonthNumber(selectedMonthIdentifier)} Focus Areas</h3>
+                    <p className="text-sm text-gray-700 mb-4">
+                      During {selectedStage.title}, you'll focus on {selectedStage.knowledgeDomain} with these key activities:
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="rounded-lg border border-blue-200 p-4 bg-blue-50">
+                        <h4 className="font-medium text-blue-800 mb-2 flex items-center">
+                          <CheckCircleIcon className="h-5 w-5 mr-2 text-blue-600" />
+                          Key Objectives
+                        </h4>
+                        <ul className="space-y-2">
+                          {tasks.map((task, i) => (
+                            <li key={i} className="flex items-start">
+                              <div className="flex-shrink-0 mt-0.5 mr-2">
+                                {task.completed ? (
+                                  <CheckCircleIcon className="h-5 w-5 text-green-500" />
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full border-2 border-gray-300"></div>
+                                )}
+                              </div>
+                              <span className="text-sm text-gray-700">{task.title}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      AI Suggestions
-                    </h4>
-                    <div className="flex">
-                      <div className="bg-white p-2 rounded-lg shadow-sm mr-4 flex-shrink-0">
-                        <ChatBubbleLeftRightIcon className="w-5 h-5 text-blue-600" />
+                      
+                      <div className="rounded-lg border border-purple-200 p-4 bg-purple-50">
+                        <h4 className="font-medium text-purple-800 mb-2 flex items-center">
+                          <AcademicCapIcon className="h-5 w-5 mr-2 text-purple-600" />
+                          Skills Development
+                        </h4>
+                        <ul className="space-y-2">
+                          <li className="flex items-center">
+                            <div className="w-2 h-2 rounded-full bg-purple-400 mr-2"></div>
+                            <span className="text-sm text-gray-700">Technical environment basics</span>
+                          </li>
+                          <li className="flex items-center">
+                            <div className="w-2 h-2 rounded-full bg-purple-400 mr-2"></div>
+                            <span className="text-sm text-gray-700">Company tools and processes</span>
+                          </li>
+                          <li className="flex items-center">
+                            <div className="w-2 h-2 rounded-full bg-purple-400 mr-2"></div>
+                            <span className="text-sm text-gray-700">HR systems and compliance</span>
+                          </li>
+                          <li className="flex items-center">
+                            <div className="w-2 h-2 rounded-full bg-purple-400 mr-2"></div>
+                            <span className="text-sm text-gray-700">Team communication norms</span>
+                          </li>
+                        </ul>
                       </div>
-                      <div>
-                        <p className="text-sm text-blue-700">{aiTip}</p>
-                        
-                        {selectedStage.month === 1 && (
-                          <button 
-                            onClick={() => navigate('/newhire/firstmonth')}
-                            className="mt-4 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium shadow-sm hover:bg-blue-700 transition-colors duration-200 inline-flex items-center"
-                          >
-                            First Month Details
-                            <ArrowRightCircleIcon className="ml-1.5 w-3.5 h-3.5" />
+                    </div>
+                    
+                    {/* Show more detailed content for excited/interested users */}
+                    {(currentEmotion === 'excited' || currentEmotion === 'interested') && (
+                      <div className="mt-4 rounded-lg border border-green-200 p-4 bg-green-50">
+                        <h4 className="font-medium text-green-800 mb-2 flex items-center">
+                          <SparklesIcon className="h-5 w-5 mr-2 text-green-600" />
+                          Advanced Opportunities
+                        </h4>
+                        <p className="text-sm text-gray-700 mb-2">
+                          Since you're progressing well, here are some additional opportunities to accelerate your learning:
+                        </p>
+                        <ul className="space-y-2">
+                          <li className="flex items-start">
+                            <ArrowRightCircleIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">Shadow a senior team member on a real project task</span>
+                          </li>
+                          <li className="flex items-start">
+                            <ArrowRightCircleIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">Explore the advanced technical documentation ahead of schedule</span>
+                          </li>
+                          <li className="flex items-start">
+                            <ArrowRightCircleIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">Join an upcoming technical workshop (optional)</span>
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Show reassurance for anxious users */}
+                    {currentEmotion === 'anxious' && (
+                      <div className="mt-4 rounded-lg border border-amber-200 p-4 bg-amber-50">
+                        <h4 className="font-medium text-amber-800 mb-2 flex items-center">
+                          <LightBulbIcon className="h-5 w-5 mr-2 text-amber-600" />
+                          Success Tips
+                        </h4>
+                        <p className="text-sm text-gray-700 mb-2">
+                          Many new team members feel the same way at this stage. Here are some reassuring facts:
+                        </p>
+                        <ul className="space-y-2">
+                          <li className="flex items-start">
+                            <CheckCircleIcon className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">Over 90% of new hires have questions during this phase - it's completely normal</span>
+                          </li>
+                          <li className="flex items-start">
+                            <CheckCircleIcon className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">Your mentor and team are here to help - you don't need to figure everything out alone</span>
+                          </li>
+                          <li className="flex items-start">
+                            <CheckCircleIcon className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">You can break each task into smaller steps - no need to tackle everything at once</span>
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Show more engaging content for bored users */}
+                    {currentEmotion === 'bored' && (
+                      <div className="mt-4 rounded-lg border border-yellow-200 p-4 bg-yellow-50">
+                        <h4 className="font-medium text-yellow-800 mb-2 flex items-center">
+                          <SparklesIcon className="h-5 w-5 mr-2 text-yellow-600" />
+                          Challenge Yourself
+                        </h4>
+                        <p className="text-sm text-gray-700 mb-2">
+                          Looking for something more engaging? Try these challenges:
+                        </p>
+                        <ul className="space-y-2">
+                          <li className="flex items-start">
+                            <StarIcon className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">Set up your development environment with advanced configurations</span>
+                          </li>
+                          <li className="flex items-start">
+                            <StarIcon className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">Volunteer to contribute to a real codebase task with supervision</span>
+                          </li>
+                          <li className="flex items-start">
+                            <StarIcon className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">Create a small side project using the company's tech stack</span>
+                          </li>
+                        </ul>
+                        <div className="mt-2">
+                          <button className="text-sm font-medium text-yellow-700 hover:text-yellow-800 flex items-center">
+                            Skip to more advanced content
+                            <ArrowRightCircleIcon className="h-4 w-4 ml-1" />
                           </button>
-                        )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <div className="mt-4 flex justify-end">
+                  <button
+                    className={`px-4 py-2 rounded-lg text-sm font-medium ${emotionStyles.buttonBg} ${emotionStyles.buttonText}`}
+                    onClick={() => navigate('/newhire/firstmonth')}
+                  >
+                    View detailed month plan
+                    <ArrowRightCircleIcon className="ml-1 h-4 w-4 inline" />
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Tasks Tab */}
+            {activeTab === 'tasks' && (
+              <div>
+                {/* Simplify tasks for confused/frustrated users */}
+                {(currentEmotion === 'confused' || currentEmotion === 'frustrated') ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-700 mb-4">
+                      Here are your key tasks for this month, broken down into simple steps:
+                    </p>
+                    
+                    {tasks.map((task, i) => (
+                      <div key={i} className="border border-gray-200 rounded-lg p-4 bg-white">
+                        <div className="flex items-start">
+                          <div className="flex-shrink-0 mt-0.5 mr-3">
+                            {task.completed ? (
+                              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                                <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                              </div>
+                            ) : (
+                              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                                <span className="text-sm font-medium text-blue-700">{i+1}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-900">{task.title}</h4>
+                            <p className="text-xs text-gray-500 mt-1">Focus on this step before moving to the next one</p>
+                            
+                            {/* Add simplified instructions for each task */}
+                            <div className="mt-2 pl-2 border-l-2 border-blue-200">
+                              {task.id === 't1' && (
+                                <p className="text-xs text-gray-600">
+                                  Visit the HR portal link in your welcome email and follow the step-by-step form.
+                                </p>
+                              )}
+                              {task.id === 't2' && (
+                                <p className="text-xs text-gray-600">
+                                  Follow the "Dev Environment Setup Guide" in your resources. Take your time with each step.
+                                </p>
+                              )}
+                              {task.id === 't3' && (
+                                <p className="text-xs text-gray-600">
+                                  Check your calendar for the scheduled meeting. No preparation needed.
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* Normal tasks view for other emotional states */
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-medium text-gray-900">Tasks for {selectedStage.title}</h3>
+                      <span className="text-sm text-gray-500">
+                        {tasks.filter(t => t.completed).length}/{tasks.length} completed
+                      </span>
+                    </div>
+                    
+                    {/* Task list */}
+                    <div className="space-y-3">
+                      {tasks.map((task, i) => (
+                        <div key={i} className={`border rounded-lg p-4 ${
+                          task.completed ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                        } transition-colors cursor-pointer group`}>
+                          <div className="flex items-start">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {task.completed ? (
+                                <CheckCircleIcon className="h-5 w-5 text-green-500" />
+                              ) : (
+                                <div className="w-5 h-5 rounded-full border-2 border-gray-300 group-hover:border-blue-500"></div>
+                              )}
+                            </div>
+                            <div className="ml-3">
+                              <div className={`text-sm font-medium ${task.completed ? 'text-green-800' : 'text-gray-900'}`}>
+                                {task.title}
+                              </div>
+                              
+                              {/* Show task actions for excited/interested users */}
+                              {(currentEmotion === 'excited' || currentEmotion === 'interested') && !task.completed && (
+                                <div className="mt-2">
+                                  <button className="text-xs font-medium text-blue-600 hover:text-blue-800">
+                                    Start task now →
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                            {/* Show status badge */}
+                            <div className="ml-auto">
+                              {task.completed ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  Completed
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  To Do
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Additional content for bored users */}
+                    {currentEmotion === 'bored' && (
+                      <div className="mt-4 border border-yellow-200 rounded-lg p-4 bg-yellow-50">
+                        <h4 className="font-medium text-yellow-800 mb-2">Optional Challenges</h4>
+                        <div className="space-y-3">
+                          <div className="border border-yellow-300 rounded-lg p-3 bg-white">
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 mt-0.5">
+                                <StarIcon className="h-5 w-5 text-yellow-500" />
+                              </div>
+                              <div className="ml-3">
+                                <div className="text-sm font-medium text-gray-900">
+                                  Install additional development tools and extensions
+                                </div>
+                                <div className="mt-1">
+                                  <button className="text-xs font-medium text-yellow-600 hover:text-yellow-800">
+                                    View recommendations →
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="border border-yellow-300 rounded-lg p-3 bg-white">
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 mt-0.5">
+                                <StarIcon className="h-5 w-5 text-yellow-500" />
+                              </div>
+                              <div className="ml-3">
+                                <div className="text-sm font-medium text-gray-900">
+                                  Set up version control for a sample project
+                                </div>
+                                <div className="mt-1">
+                                  <button className="text-xs font-medium text-yellow-600 hover:text-yellow-800">
+                                    Start challenge →
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Resources Tab */}
+            {activeTab === 'resources' && (
+              <div>
+                {/* Simplified resources for confused/frustrated users */}
+                {(currentEmotion === 'confused' || currentEmotion === 'frustrated') ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-700 mb-4">
+                      Here are the most important resources for you right now:
+                    </p>
+                    
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-blue-50 px-4 py-2 border-b border-blue-100">
+                        <h4 className="font-medium text-blue-800 text-sm">Essential Resources</h4>
+                      </div>
+                      <div className="divide-y divide-gray-200">
+                        {resources.slice(0, 2).map((resource, i) => (
+                          <div key={i} className="p-4 hover:bg-blue-50 transition-colors">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0">
+                                {getResourceIcon(resource.type)}
+                              </div>
+                              <div className="ml-3">
+                                <h5 className="text-sm font-medium text-gray-900">{resource.title}</h5>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {resource.type === 'document' ? 'Documentation' : 'Video Tutorial'}
+                                </p>
+                              </div>
+                              <div className="ml-auto">
+                                <button className="inline-flex items-center px-2.5 py-1.5 border border-blue-300 text-xs font-medium rounded text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                  View
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                      <div className="flex items-start">
+                        <LightBulbIcon className="h-5 w-5 text-blue-600 mr-2 flex-shrink-0" />
+                        <p className="text-sm text-blue-700">
+                          Focus on these resources one at a time. Start with the "Dev Environment Setup Guide" if you're setting up your workspace.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Full resources view for other emotional states */
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-medium text-gray-900">Resources for {selectedStage.title}</h3>
+                      <div>
+                        <select className="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                          <option>All Resources</option>
+                          <option>Documents</option>
+                          <option>Videos</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {resources.map((resource, i) => (
+                        <div 
+                          key={i} 
+                          className={`border rounded-lg p-4 ${
+                            resource.type === 'document' ? 'bg-blue-50 border-blue-200' : 
+                            resource.type === 'video' ? 'bg-red-50 border-red-200' : 
+                            'bg-green-50 border-green-200'
+                          } hover:shadow-md transition-all`}
+                        >
+                          <div className="flex items-start">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {getResourceIcon(resource.type)}
+                            </div>
+                            <div className="ml-3">
+                              <h4 className="text-sm font-medium text-gray-900">{resource.title}</h4>
+                              
+                              <div className="mt-1 flex items-center text-xs text-gray-500">
+                                <span className="capitalize">
+                                  {resource.type}
+                                </span>
+                                <span className="mx-1">•</span>
+                                <span>
+                                  {resource.type === 'document' ? '~10 min read' : '~15 min watch'}
+                                </span>
+                              </div>
+                              
+                              {/* Extra content for different emotional states */}
+                              {currentEmotion === 'excited' && (
+                                <div className="mt-2">
+                                  <p className="text-xs text-gray-600">
+                                    This resource covers advanced concepts you might find interesting.
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {currentEmotion === 'anxious' && (
+                                <div className="mt-2">
+                                  <p className="text-xs text-gray-600">
+                                    Many team members found this resource helpful for getting started.
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                            <div className="ml-auto">
+                              <button className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                {resource.type === 'document' ? 'Read' : resource.type === 'video' ? 'Watch' : 'Access'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Team Tab */}
+            {activeTab === 'team' && (
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Team Members for {selectedStage.knowledgeDomain}
+                </h3>
+                
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {relevantTeamMembers.map((member, i) => (
+                    <div key={i} className="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-all">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          {member.avatar ? (
+                            <img 
+                              src={member.avatar} 
+                              alt={member.name} 
+                              className="h-10 w-10 rounded-full object-cover" 
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                              <span className="text-blue-800 font-medium">
+                                {member.name.split(' ').map(n => n[0]).join('')}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-3">
+                          <h4 className="text-sm font-medium text-gray-900">{member.name}</h4>
+                          <p className="text-xs text-gray-500">{member.role}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-3">
+                        <div className="flex flex-wrap gap-1">
+                          {member.expertise.map((skill, j) => (
+                            <span 
+                              key={j}
+                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center">
+                        <button className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                          View Profile
+                        </button>
+                        <button className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors font-medium">
+                          Message
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Right Panel - AI Assist - Modified based on emotional state */}
+        <div className="col-span-1">
+          <div className={`rounded-xl shadow-md overflow-hidden border ${emotionStyles.border}`}>
+            <div className={`px-4 py-3 ${emotionStyles.bg} border-b ${emotionStyles.border}`}>
+              <div className="flex items-center justify-between">
+                <h3 className={`text-base font-medium ${emotionStyles.text}`}>AI Assistant</h3>
+                <div className="flex space-x-1">
+                  <div className="flex items-center text-xs text-gray-500">
+                    <span className="inline-block h-2 w-2 rounded-full bg-green-400 mr-1"></span>
+                    <span>Online</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 h-[400px] flex flex-col">
+              <div className="flex-1 overflow-y-auto mb-4 space-y-3">
+                {aiConversation.map((message, i) => (
+                  <div 
+                    key={i} 
+                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div 
+                      className={`rounded-lg px-3 py-2 max-w-[80%] ${
+                        message.type === 'user' 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      <p className="text-sm">{message.message}</p>
+                      <p className="text-right text-xs text-gray-500 mt-1">{message.timestamp}</p>
+                    </div>
+                  </div>
+                ))}
+                
+                {aiIsThinking && (
+                  <div className="flex justify-start">
+                    <div className="rounded-lg px-3 py-2 bg-gray-100 text-gray-800">
+                      <div className="flex space-x-1">
+                        <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
+                        <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
                       </div>
                     </div>
                   </div>
                 )}
-              </motion.div>
-            )}
-
-            {/* Resources Tab */}
-            {activeTab === 'resources' && (
-              <motion.div 
-                key="resources"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="mt-4"
-              >
-                <div className="bg-white p-4 rounded-lg mb-6 border border-gray-100 shadow-sm">
-                  <h4 className="flex items-center text-md font-medium text-gray-700 mb-3">
-                    <BookOpenIcon className="w-5 h-5 mr-2 text-blue-600" />
-                    Resources filtered for {selectedStage.knowledgeDomain}
-                  </h4>
-                  <p className="text-sm text-gray-500">
-                    Curated materials to help you master the skills needed during this phase of your onboarding.
+              </div>
+              
+              <form onSubmit={handleSendQuestion} className="relative">
+                <input
+                  type="text"
+                  value={userQuestion}
+                  onChange={(e) => setUserQuestion(e.target.value)}
+                  placeholder={`Ask about ${selectedStage.title} activities...`}
+                  className="w-full border-gray-300 rounded-full pl-4 pr-10 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-800"
+                >
+                  <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </form>
+              
+              {contentAdaptation.pacing === 'slower' && (
+                <div className="mt-2 bg-blue-50 border border-blue-100 rounded-lg p-2">
+                  <p className="text-xs text-blue-700">
+                    <span className="font-medium">Tip:</span> You can ask simple, specific questions about any task or resource.
                   </p>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {resources.length > 0 ? (
-                    resources.map(resource => (
-                      <motion.div 
-                        key={resource.id} 
-                        initial={{ scale: 0.95 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.2 }}
-                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
-                      >
-                        <div className="flex items-start">
-                          <div className={`p-3 rounded-lg ${resource.type === 'document' ? 'bg-blue-100' : 'bg-purple-100'} mr-4 flex-shrink-0`}>
-                            {getResourceIcon(resource.type)}
-                          </div>
-                          <div>
-                            <h5 className="font-medium text-gray-800 mb-1">{resource.title}</h5>
-                            <p className="text-xs text-gray-500 mb-3">
-                              {resource.type === 'document' ? 'Documentation • 5 min read' : 'Video • 10 min watch'}
-                            </p>
-                            <div className="flex items-center">
-                              <div className="flex-1">
-                                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                                  <div className="h-full bg-blue-500 rounded-full" style={{ width: '0%' }}></div>
-                                </div>
-                                <p className="text-xs text-gray-500 mt-1">Not started</p>
-                              </div>
-                              <button className="ml-3 px-3 py-1 bg-blue-600 text-white text-xs rounded-lg">Start</button>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))
-                  ) : (
-                    <div className="col-span-2 text-center py-12">
-                      <DocumentTextIcon className="w-12 h-12 mx-auto text-gray-300 mb-4" />
-                      <p className="text-gray-500">No resources available for this period yet.</p>
-                    </div>
-                  )}
+              )}
+            </div>
+            
+            <div className={`px-4 py-3 ${emotionStyles.bg} border-t ${emotionStyles.border}`}>
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-gray-600">
+                  <span className="font-medium">AI Learning:</span> {Math.round(aiLearnProgress)}%
                 </div>
-
-                {/* Additional recommended resources */}
-                <div className="mt-8 bg-blue-50 rounded-lg p-4 border border-blue-100">
-                  <h5 className="text-sm font-medium text-blue-700 mb-3 flex items-center">
-                    <SparklesIcon className="w-4 h-4 mr-2" />
-                    AI-Recommended Additional Resources
-                  </h5>
-                  <div className="text-xs text-gray-600 bg-white p-3 rounded-lg">
-                    <p>Based on your progress and interests, our AI suggests these additional resources:</p>
-                    <ul className="mt-2 space-y-2">
-                      <li className="flex items-center">
-                        <div className="w-1 h-1 bg-blue-400 rounded-full mr-2"></div>
-                        <span>Advanced {selectedStage.knowledgeDomain} techniques</span>
-                      </li>
-                      <li className="flex items-center">
-                        <div className="w-1 h-1 bg-blue-400 rounded-full mr-2"></div>
-                        <span>Real-world case studies from senior engineers</span>
-                      </li>
-                    </ul>
-                  </div>
+                <div>
+                  <button className="text-xs text-blue-600 hover:text-blue-800">Help Improve</button>
                 </div>
-              </motion.div>
-            )}
-
-            {/* Team Experts Tab */}
-            {activeTab === 'experts' && (
-              <motion.div 
-                key="experts"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="mt-4"
-              >
-                <div className="bg-white p-4 rounded-lg mb-6 border border-gray-100 shadow-sm">
-                  <h4 className="flex items-center text-md font-medium text-gray-700 mb-2">
-                    <UserGroupIcon className="w-5 h-5 mr-2 text-purple-600" />
-                    {relevantTeamMembers.length > 0 ? 
-                      `Team members with expertise in ${selectedStage.knowledgeDomain}` : 
-                      'Team Experts'
-                    }
-                  </h4>
-                  <p className="text-sm text-gray-500">
-                    These team members can help you with questions specific to this area.
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {relevantTeamMembers.length > 0 ? (
-                    relevantTeamMembers.map(member => (
-                      <motion.div 
-                        key={member.id}
-                        initial={{ scale: 0.95 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.2 }}
-                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all"
-                      >
-                        <div className="flex">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 text-white flex items-center justify-center font-bold text-lg mr-4">
-                            {member.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div>
-                            <h5 className="font-medium text-gray-800">{member.name}</h5>
-                            <p className="text-xs text-gray-500 mb-2">{member.role}</p>
-                            <div>
-                              {member.expertise.map((exp, i) => (
-                                <span 
-                                  key={i} 
-                                  className={`inline-block text-xs mr-2 mb-2 px-2 py-1 rounded-full ${
-                                    exp === selectedStage.knowledgeDomain ? 
-                                    'bg-blue-100 text-blue-700 border border-blue-200' : 
-                                    'bg-gray-100 text-gray-600'
-                                  }`}
-                                >
-                                  {exp}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-3 flex justify-end">
-                          <button className="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-xs rounded-lg mr-2">
-                            Message
-                          </button>
-                          <button className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg">
-                            Schedule Meeting
-                          </button>
-                        </div>
-                      </motion.div>
-                    ))
-                  ) : (
-                    <div className="col-span-2 text-center py-12">
-                      <UserGroupIcon className="w-12 h-12 mx-auto text-gray-300 mb-4" />
-                      <p className="text-gray-500">No specific experts assigned for this period yet.</p>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-
-            {/* AI Assistant Tab */}
-            {activeTab === 'ai' && (
-              <motion.div 
-                key="ai"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4"
-              >
-                {/* AI Chat Interface */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 text-white">
-                    <h4 className="text-base font-semibold flex items-center">
-                      <SparklesIcon className="w-5 h-5 mr-2" />
-                      DevBoost AI Assistant
-                    </h4>
-                    <p className="text-xs text-blue-100 mt-0.5">
-                      Context-aware for {selectedStage.title} • {selectedStage.knowledgeDomain}
-                    </p>
-                  </div>
-                  
-                  {/* Chat Messages */}
-                  <div className="h-60 overflow-y-auto p-3 flex flex-col space-y-3">
-                    {aiConversation.map((msg, index) => (
-                      <div 
-                        key={index} 
-                        className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div 
-                          className={`
-                            max-w-[80%] p-2 rounded-lg 
-                            ${msg.type === 'user' 
-                              ? 'bg-blue-50 text-gray-800 rounded-br-none' 
-                              : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-bl-none'
-                            }
-                          `}
-                        >
-                          <p className="text-xs">{msg.message}</p>
-                          <p className="text-[10px] opacity-70 text-right mt-1">{msg.timestamp}</p>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {/* AI Thinking Indicator */}
-                    {aiIsThinking && (
-                      <div className="flex justify-start">
-                        <div className="bg-gray-100 p-2 rounded-lg flex items-center">
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '600ms' }}></div>
-                          </div>
-                          <span className="ml-2 text-xs text-gray-500">DevBoost AI is thinking...</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Chat Input */}
-                  <form 
-                    onSubmit={handleSendQuestion}
-                    className="border-t border-gray-200 p-3 flex"
-                  >
-                    <input
-                      type="text"
-                      value={userQuestion}
-                      onChange={(e) => setUserQuestion(e.target.value)}
-                      placeholder={`Ask about ${selectedStage.knowledgeDomain}...`}
-                      className="flex-grow rounded-l-lg border-gray-300 text-sm"
-                    />
-                    <button
-                      type="submit"
-                      className="bg-blue-600 text-white px-3 py-2 rounded-r-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                    >
-                      Send
-                    </button>
-                  </form>
-                </div>
-                
-                {/* AI Learning Visualization */}
-                <div className="bg-gradient-to-br from-gray-50 to-purple-50 rounded-xl border border-purple-100 p-5 shadow-md">
-                  <h4 className="font-semibold mb-5 text-gray-800 flex items-center">
-                    <div className="bg-purple-600 p-1.5 rounded-lg mr-2">
-                      <AcademicCapIcon className="w-4 h-4 text-white" />
-                    </div>
-                    How DevBoost AI Learns From You
-                  </h4>
-                  
-                  {/* AI Learning Progress */}
-                  <div className="bg-white rounded-lg p-4 border border-gray-100 mb-4">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium text-gray-700">AI Learning Progress</span>
-                      <span className="text-blue-600 font-medium">{aiLearnProgress}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
-                        style={{ width: `${aiLearnProgress}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      The more you interact, the better the AI understands your needs
-                    </p>
-                  </div>
-                  
-                  {/* Knowledge Areas */}
-                  <div className="space-y-3">
-                    <h5 className="text-sm font-medium text-gray-700">AI Knowledge Areas</h5>
-                    
-                    {/* Company-Specific Knowledge */}
-                    <div className="bg-white p-3 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                            <BriefcaseIcon className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">Company-Specific</p>
-                            <div className="flex items-center">
-                              <div className="w-20 h-1.5 bg-gray-100 rounded-full mr-2">
-                                <div className="h-full bg-blue-500 rounded-full" style={{ width: '60%' }}></div>
-                              </div>
-                              <span className="text-xs text-gray-500">60%</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Technical Knowledge */}
-                    <div className="bg-white p-3 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
-                            <CodeBracketIcon className="w-4 h-4 text-indigo-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">Technical</p>
-                            <div className="flex items-center">
-                              <div className="w-20 h-1.5 bg-gray-100 rounded-full mr-2">
-                                <div className="h-full bg-indigo-500 rounded-full" style={{ width: '85%' }}></div>
-                              </div>
-                              <span className="text-xs text-gray-500">85%</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Personal Preferences */}
-                    <div className="bg-white p-3 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                            <CogIcon className="w-4 h-4 text-green-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">Your Preferences</p>
-                            <div className="flex items-center">
-                              <div className="w-20 h-1.5 bg-gray-100 rounded-full mr-2">
-                                <div className="h-full bg-green-500 rounded-full" style={{ width: '35%' }}></div>
-                              </div>
-                              <span className="text-xs text-gray-500">35%</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+              <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-blue-500 rounded-full" 
+                  style={{ width: `${aiLearnProgress}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
