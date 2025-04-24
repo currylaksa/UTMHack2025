@@ -12,7 +12,9 @@ import {
   CalendarIcon,
   ArrowTrendingUpIcon,
   SparklesIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
+  ChartBarIcon,
+  DocumentChartBarIcon
 } from '@heroicons/react/24/outline';
 
 // Import images
@@ -28,6 +30,61 @@ const mockTeamMembers = [
   { id: 'tm3', name: 'Priya Patel', role: 'Software Engineer I', startDate: '2025-04-01', currentMonthInJourney: 1, progressPercent: 85, productivity: 'On Track', avatar: JY2, tasks: { completed: 8, total: 10 } },
   { id: 'tm4', name: 'Michael Brown', role: 'Senior Software Engineer', startDate: '2024-12-01', currentMonthInJourney: 5, progressPercent: 60, productivity: 'On Track', avatar: QY2, tasks: { completed: 42, total: 50 } },
 ];
+
+// Enhanced mock data for team analytics with trending indicators
+const mockTeamAnalytics = {
+  // Historical data (last 6 months)
+  historicalProgress: [
+    { month: 'Nov', avgProgressPercent: 62, industryAvg: 55, trend: 'stable' },
+    { month: 'Dec', avgProgressPercent: 64, industryAvg: 56, trend: 'up' },
+    { month: 'Jan', avgProgressPercent: 58, industryAvg: 57, trend: 'down' },
+    { month: 'Feb', avgProgressPercent: 66, industryAvg: 58, trend: 'up' },
+    { month: 'Mar', avgProgressPercent: 65, industryAvg: 59, trend: 'stable' },
+    { month: 'Apr', avgProgressPercent: 68, industryAvg: 60, trend: 'up' }
+  ],
+  // Benchmarks against industry
+  benchmarks: {
+    onboardingCompletionTime: { 
+      team: 21, // days
+      industry: 30, // days
+      diffPercent: -30, // negative means better/faster than industry
+      ranking: "Top 15%" // NEW: ranking information
+    },
+    taskCompletionRate: {
+      team: 82, // percent
+      industry: 75, // percent
+      diffPercent: 9.3, // positive means better than industry
+      ranking: "Top 20%" // NEW: ranking information
+    },
+    employeeSatisfaction: {
+      team: 4.2, // out of 5
+      industry: 3.8, // out of 5
+      diffPercent: 10.5, // positive means better than industry
+      ranking: "Top 25%" // NEW: ranking information
+    },
+    timeToProductive: {
+      team: 45, // days
+      industry: 60, // days
+      diffPercent: -25 // negative means better/faster than industry
+    }
+  },
+  // Progress distribution by role
+  progressByRole: {
+    'Software Engineer I': { avgProgress: 65, count: 2 },
+    'Software Engineer II': { avgProgress: 75, count: 1 },
+    'Senior Software Engineer': { avgProgress: 60, count: 1 }
+  },
+  // Prediction data
+  predictions: {
+    retentionRisk: { low: 3, medium: 1, high: 0 },
+    timeToFullProductivity: { 
+      'Sarah Chen': 90, // days
+      'James Wilson': 60, // days
+      'Priya Patel': 75, // days
+      'Michael Brown': 45 // days
+    }
+  }
+};
 
 const mockAiInsights = [
   {
@@ -302,6 +359,247 @@ const StatCard = ({ icon: Icon, title, value, subtext, color, trend, linkText, l
 };
 
 
+// New visualization components
+const TeamProgressChart = ({ historicalData }) => {
+  // In a production app, we would use a charting library like Chart.js, Recharts or Nivo
+  // For this prototype, we'll create a simplified visualization
+  const maxValue = Math.max(
+    ...historicalData.map(item => Math.max(item.avgProgressPercent, item.industryAvg))
+  );
+  
+  return (
+    <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 overflow-hidden">
+      <h3 className="text-sm font-semibold text-gray-700 mb-4">Team Progress Trends</h3>
+      
+      <div className="flex flex-col space-y-3">
+        <div className="flex items-center justify-between text-xs text-gray-500 px-1">
+          <div>Progress %</div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-indigo-500 rounded-sm mr-1"></div>
+              <span>Your Team</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-gray-300 rounded-sm mr-1"></div>
+              <span>Industry Avg</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="relative h-44">
+          {/* Chart grid lines */}
+          <div className="absolute inset-0 border-t border-l border-gray-200 grid grid-rows-4 gap-0 h-full">
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className="border-b border-gray-100 relative">
+                <span className="absolute -left-6 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
+                  {Math.round(maxValue - (i * (maxValue / 4)))}%
+                </span>
+              </div>
+            ))}
+          </div>
+          
+          {/* Chart bars */}
+          <div className="absolute inset-0 pt-2 pb-1 flex items-end">
+            <div className="w-full h-full flex justify-between items-end">
+              {historicalData.map((item, index) => (
+                <div key={index} className="flex-1 flex flex-col items-center justify-end h-full space-y-1 px-1">
+                  {/* Team bar */}
+                  <div 
+                    className="w-4 bg-gradient-to-t from-indigo-500 to-indigo-400 rounded-t-sm relative group"
+                    style={{ height: `${(item.avgProgressPercent / maxValue) * 100}%` }}
+                  >
+                    <div className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 transform -translate-x-1/2 bg-indigo-800 text-white text-xs py-1 px-2 rounded-md transition-opacity">
+                      {item.avgProgressPercent}%
+                    </div>
+                  </div>
+                  
+                  {/* Industry bar */}
+                  <div 
+                    className="w-4 bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-sm relative group"
+                    style={{ height: `${(item.industryAvg / maxValue) * 100}%` }}
+                  >
+                    <div className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white text-xs py-1 px-2 rounded-md transition-opacity">
+                      {item.industryAvg}%
+                    </div>
+                  </div>
+                  
+                  {/* Month label */}
+                  <div className="text-xs text-gray-500 mt-1">{item.month}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="mt-4 text-xs text-gray-600">
+        <div className="flex items-center justify-between">
+          <span>6-Month Progress:</span>
+          <span className="font-semibold">
+            {(() => {
+              const startValue = historicalData[0].avgProgressPercent;
+              const endValue = historicalData[historicalData.length - 1].avgProgressPercent;
+              const change = endValue - startValue;
+              const changePercent = Math.round((change / startValue) * 100);
+              return (
+                <span className={`${changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {changePercent >= 0 ? '+' : ''}{changePercent}%
+                  <span className="text-gray-400 ml-1">from {startValue}% to {endValue}%</span>
+                </span>
+              );
+            })()}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ComparativeBenchmarks = ({ benchmarkData }) => {
+  return (
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-md border border-blue-200 p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-indigo-700">Onboarding Benchmarks</h3>
+        <Badge 
+          label="Industry Comparison" 
+          color="indigo" 
+          size="sm" 
+        />
+      </div>
+      
+      <div className="space-y-4">
+        {Object.entries(benchmarkData).map(([key, data]) => {
+          // Format the key for display
+          const formattedKey = key
+            .replace(/([A-Z])/g, ' $1') // Add spaces before capital letters
+            .replace(/^./, str => str.toUpperCase()); // Capitalize first letter
+            
+          // Determine if positive values are good (improves readability)
+          const isNegativeBetter = key === 'onboardingCompletionTime' || key === 'timeToProductive';
+          
+          // Determine color based on comparison with industry
+          const isPositive = isNegativeBetter ? data.diffPercent < 0 : data.diffPercent > 0;
+          const textColorClass = isPositive ? 'text-green-600' : 'text-red-600';
+          
+          return (
+            <div key={key} className="bg-white/80 rounded-lg p-3 shadow-sm border border-blue-100">
+              <div className="flex justify-between items-center">
+                <div className="text-sm font-medium text-gray-800">{formattedKey}</div>
+                <div className={`text-sm font-bold ${textColorClass} flex items-center`}>
+                  {isPositive ? 
+                    <ArrowTrendingUpIcon className="w-3.5 h-3.5 mr-1" /> : 
+                    <ArrowTrendingUpIcon className="w-3.5 h-3.5 mr-1 transform rotate-180" />
+                  }
+                  {Math.abs(data.diffPercent).toFixed(1)}% {isPositive ? 'better' : 'worse'}
+                </div>
+              </div>
+              
+              <div className="mt-2 relative pt-1">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="text-xs text-indigo-700">Your team: <span className="font-bold">{data.team}</span></div>
+                  <div className="text-xs text-gray-600">Industry: <span className="font-medium">{data.industry}</span></div>
+                </div>
+                <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                  <div
+                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-indigo-500 to-purple-500"
+                    style={{ width: `${(data.team / Math.max(data.team, data.industry)) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const PredictiveAnalytics = ({ predictions, teamMembers }) => {
+  // Calculate average time to productivity
+  const avgTime = Object.values(predictions.timeToFullProductivity).reduce((sum, time) => sum + time, 0) / 
+                Object.values(predictions.timeToFullProductivity).length;
+                
+  return (
+    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-md border border-purple-200 p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-purple-700 flex items-center">
+          <SparklesIcon className="w-4 h-4 mr-1.5 text-purple-500" />
+          AI Predictions
+        </h3>
+        <Badge label="Powered by AI" color="purple" size="sm" />
+      </div>
+      
+      <div className="grid grid-cols-1 gap-3">
+        {/* Retention Risk */}
+        <div className="bg-white/80 rounded-lg p-3 shadow-sm border border-purple-100">
+          <div className="text-sm font-medium text-gray-800 mb-2">Retention Risk Levels</div>
+          <div className="flex justify-between items-center">
+            <div className="flex space-x-2">
+              <div className="flex flex-col items-center">
+                <div className="text-xs font-medium text-green-700 mb-1">Low</div>
+                <div className="h-12 w-8 bg-gradient-to-t from-green-500 to-green-300 rounded-t-sm flex items-center justify-center text-white font-medium">
+                  {predictions.retentionRisk.low}
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="text-xs font-medium text-yellow-700 mb-1">Medium</div>
+                <div className="h-12 w-8 bg-gradient-to-t from-yellow-500 to-yellow-300 rounded-t-sm flex items-center justify-center text-white font-medium">
+                  {predictions.retentionRisk.medium}
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="text-xs font-medium text-red-700 mb-1">High</div>
+                <div className="h-12 w-8 bg-gradient-to-t from-red-500 to-red-300 rounded-t-sm flex items-center justify-center text-white font-medium">
+                  {predictions.retentionRisk.high}
+                </div>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500">
+              {predictions.retentionRisk.high > 0 ? 
+                <span className="text-red-600 font-medium">Action needed</span> : 
+                <span className="text-green-600 font-medium">Looking good</span>
+              }
+            </div>
+          </div>
+        </div>
+        
+        {/* Time to Productivity */}
+        <div className="bg-white/80 rounded-lg p-3 shadow-sm border border-purple-100">
+          <div className="text-sm font-medium text-gray-800 mb-2">Predicted Time to Full Productivity</div>
+          <div className="space-y-2">
+            {Object.entries(predictions.timeToFullProductivity).map(([name, days], idx) => {
+              // Find matching team member
+              const member = teamMembers.find(m => m.name === name);
+              const isAboveAverage = days > avgTime;
+              
+              return (
+                <div key={name} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Avatar src={member?.avatar} alt={name} size="sm" />
+                    <span className="ml-2 text-xs font-medium text-gray-700">{name}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className={`text-xs font-bold ${isAboveAverage ? 'text-yellow-600' : 'text-green-600'}`}>
+                      {days} days
+                    </span>
+                    {isAboveAverage && 
+                      <ExclamationTriangleIcon className="w-3.5 h-3.5 ml-1 text-yellow-500" />
+                    }
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-500 flex items-center justify-between">
+            <span>Team average:</span>
+            <span className="font-medium">{Math.round(avgTime)} days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const InsightCard = ({ insight, isExpanded, teamMembers, onToggle, onDismiss, onAction }) => {
   const typeIcons = {
     warning: <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500" />,
@@ -417,6 +715,7 @@ function ManagerDashboard() {
   // Using mock data (in real app, this would come from props or API call)
   const teamMembers = mockTeamMembers;
   const insights = mockAiInsights;
+  const teamAnalytics = mockTeamAnalytics; // Use our new analytics data
 
   // Derived/memoized data
   const stats = useMemo(() => {
@@ -573,8 +872,50 @@ function ManagerDashboard() {
       </section>
 
       {/* Main Content Area */}
-      {/* FIX: Corrected structure - Team Members and AI Insights are now siblings */}
+      {/* Grid structure with 3 columns on large screens */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Team Analytics Section - Full Width */}
+        <div className="lg:col-span-3 mb-6">
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                <DocumentChartBarIcon className="w-5 h-5 mr-2 text-indigo-500"/>
+                Team Analytics
+              </h2>
+              <div className="flex gap-2">
+                <Badge label="Enhanced" color="indigo" size="sm" />
+                <button 
+                  className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium py-1 px-2 rounded flex items-center transition-colors"
+                  onClick={handleRefreshData}
+                >
+                  <ArrowPathIcon className={`h-3.5 w-3.5 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Dynamic Team Progress Visualization */}
+              <div className="md:col-span-2">
+                <TeamProgressChart historicalData={teamAnalytics.historicalProgress} />
+              </div>
+              
+              {/* Comparative Benchmarks */}
+              <div className="md:col-span-1">
+                <ComparativeBenchmarks benchmarkData={teamAnalytics.benchmarks} />
+              </div>
+            </div>
+            
+            {/* Predictive Analytics */}
+            <div className="mt-6">
+              <PredictiveAnalytics 
+                predictions={teamAnalytics.predictions} 
+                teamMembers={teamMembers} 
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Team Members Section */}
         <div className="lg:col-span-2 space-y-6">
@@ -765,8 +1106,7 @@ function ManagerDashboard() {
         </div> {/* End Team Members Section (lg:col-span-2) */}
 
         {/* AI Insights Section */}
-        {/* FIX: Moved this section to be a direct child of the grid */}
-        <div id="ai-insights" className="lg:col-span-1 space-y-6"> {/* Adjusted to col-span-1 */}
+        <div id="ai-insights" className="lg:col-span-1 space-y-6">
           {/* Insights Header */}
           <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-md border border-indigo-200 p-4 sticky top-4 z-10"> {/* Added sticky for scrolling */}
             <div className="flex items-center justify-between flex-wrap gap-2">
