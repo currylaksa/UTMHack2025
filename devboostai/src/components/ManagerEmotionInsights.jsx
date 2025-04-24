@@ -17,7 +17,7 @@ import {
 // based on team members' emotional data
 
 const ManagerEmotionInsights = ({ teamMemberData }) => {
-  const [activeTab, setActiveTab] = useState('insights'); // insights, recommendations, trends
+  const [activeTab, setActiveTab] = useState('insights'); // insights, trends
   const [expandedMember, setExpandedMember] = useState(null);
   const [trendTimeframe, setTrendTimeframe] = useState('week'); // week, month, quarter
   
@@ -439,12 +439,6 @@ const ManagerEmotionInsights = ({ teamMemberData }) => {
             Insights
           </button>
           <button
-            className={`ml-8 px-4 py-2 text-sm font-medium ${activeTab === 'recommendations' ? 'text-indigo-700 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-            onClick={() => setActiveTab('recommendations')}
-          >
-            Recommendations
-          </button>
-          <button
             className={`ml-8 px-4 py-2 text-sm font-medium ${activeTab === 'trends' ? 'text-indigo-700 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
             onClick={() => setActiveTab('trends')}
           >
@@ -534,13 +528,6 @@ const ManagerEmotionInsights = ({ teamMemberData }) => {
                 </div>
               </div>
             ))}
-          </div>
-        )}
-        
-        {activeTab === 'recommendations' && (
-          <div className="space-y-4">
-            <p className="text-sm text-gray-500">Select a team member to view personalized coaching recommendations.</p>
-            {/* Recommendations tab content */}
           </div>
         )}
         
