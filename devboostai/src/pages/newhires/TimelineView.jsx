@@ -13,10 +13,20 @@ import {
   SparklesIcon,
   StarIcon,
   FireIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
+  LockClosedIcon // Added lock icon import
+} from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  BookOpenIcon, 
+  ChartBarIcon, 
+  CogIcon,
+  CodeBracketIcon,
+  BriefcaseIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 
-// --- Enhanced Colorful Data ---
+// --- Enhanced Colorful Data with fixed progress values ---
 const timelineStages = [
   { 
     month: 1, 
@@ -27,7 +37,10 @@ const timelineStages = [
     ringColor: "ring-blue-300",
     borderColor: "border-blue-400",
     icon: <RocketLaunchIcon className="h-5 w-5" />,
-    iconBg: "bg-blue-600"
+    iconBg: "bg-blue-600",
+    progress: 35,
+    knowledgeDomain: "Environment Setup",
+    domainColor: "bg-blue-400"
   },
   { 
     month: 2, 
@@ -38,7 +51,10 @@ const timelineStages = [
     ringColor: "ring-purple-300",
     borderColor: "border-purple-400", 
     icon: <UserGroupIcon className="h-5 w-5" />,
-    iconBg: "bg-purple-600"
+    iconBg: "bg-purple-600",
+    progress: 0, // Changed from 20% to 0% as it's locked until 1st month is 100%
+    knowledgeDomain: "Team Integration",
+    domainColor: "bg-purple-400"
   },
   { 
     month: "3 & 4", 
@@ -49,7 +65,10 @@ const timelineStages = [
     ringColor: "ring-indigo-300",
     borderColor: "border-indigo-400",
     icon: <CalendarIcon className="h-5 w-5" />,
-    iconBg: "bg-indigo-600"
+    iconBg: "bg-indigo-600",
+    progress: 10,
+    knowledgeDomain: "HR Processes",
+    domainColor: "bg-indigo-400"
   },
   { 
     month: "5, 6, & 7", 
@@ -60,7 +79,10 @@ const timelineStages = [
     ringColor: "ring-teal-300",
     borderColor: "border-teal-400",
     icon: <DocumentTextIcon className="h-5 w-5" />,
-    iconBg: "bg-teal-600"
+    iconBg: "bg-teal-600",
+    progress: 5,
+    knowledgeDomain: "Technical Skills",
+    domainColor: "bg-teal-400"
   },
   { 
     month: "8, 9, 10", 
@@ -71,7 +93,10 @@ const timelineStages = [
     ringColor: "ring-pink-300",
     borderColor: "border-pink-400",
     icon: <StarIcon className="h-5 w-5" />,
-    iconBg: "bg-pink-600"
+    iconBg: "bg-pink-600",
+    progress: 0,
+    knowledgeDomain: "Impact Assessment",
+    domainColor: "bg-pink-400"
   },
   { 
     month: 12, 
@@ -82,7 +107,45 @@ const timelineStages = [
     ringColor: "ring-amber-300",
     borderColor: "border-amber-400",
     icon: <FireIcon className="h-5 w-5" />,
-    iconBg: "bg-amber-600"
+    iconBg: "bg-amber-600",
+    progress: 0,
+    knowledgeDomain: "Career Planning",
+    domainColor: "bg-amber-400"
+  }
+];
+
+const expertTeamMembers = [
+  { 
+    id: 'tm1', 
+    name: 'Sarah Chen', 
+    role: 'Senior Developer',
+    avatar: null,
+    expertise: ['Environment Setup', 'Technical Skills'],
+    domains: [1, 5, 6, 7]
+  },
+  { 
+    id: 'tm2', 
+    name: 'James Wilson', 
+    role: 'HR Specialist',
+    avatar: null,
+    expertise: ['HR Processes', 'Team Integration'],
+    domains: [2, 3, 4]
+  },
+  { 
+    id: 'tm3', 
+    name: 'Michael Rodriguez', 
+    role: 'Team Lead', 
+    avatar: null,
+    expertise: ['Career Planning', 'Team Integration'],
+    domains: [2, 12]
+  },
+  { 
+    id: 'tm4', 
+    name: 'Lisa Taylor', 
+    role: 'Product Manager', 
+    avatar: null,
+    expertise: ['Impact Assessment'],
+    domains: [8, 9, 10]
   }
 ];
 
@@ -129,15 +192,40 @@ function TimelineView() {
   const [selectedMonthIdentifier, setSelectedMonthIdentifier] = useState(timelineStages[0].month);
   const [animatingStage, setAnimatingStage] = useState(null);
   const [animateHeader, setAnimateHeader] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview'); // New state for context panel tabs
+  const [aiIsThinking, setAiIsThinking] = useState(false); // For AI thinking animation
+  const [aiConversation, setAiConversation] = useState([
+    { type: 'ai', message: 'How can I help with your onboarding journey?', timestamp: new Date().toLocaleTimeString() }
+  ]);
+  const [userQuestion, setUserQuestion] = useState('');
+  const [aiLearnProgress, setAiLearnProgress] = useState(25); // AI learning progress percentage
+  const [contextTransition, setContextTransition] = useState(false); // For smooth transitions
+  
   const navigate = useNavigate();
 
   const selectedStage = timelineStages.find(s => s.month === selectedMonthIdentifier);
   const { tasks, resources, aiTip } = getMockDetailsForMonth(selectedMonthIdentifier);
+  
+  // Get relevant team members who have expertise in the selected month's domain
+  const relevantTeamMembers = expertTeamMembers.filter(member => 
+    member.expertise.includes(selectedStage.knowledgeDomain) || 
+    member.domains.includes(getMonthNumber(selectedMonthIdentifier))
+  );
 
   // Trigger header animation on component mount
   useEffect(() => {
     setAnimateHeader(true);
   }, []);
+  
+  // Trigger context panel transition effect when selected month changes
+  useEffect(() => {
+    if (selectedMonthIdentifier) {
+      setContextTransition(true);
+      setTimeout(() => {
+        setContextTransition(false);
+      }, 300);
+    }
+  }, [selectedMonthIdentifier]);
 
   const getResourceIcon = (type) => {
     switch (type) {
@@ -158,9 +246,60 @@ function TimelineView() {
       if (stage.month === 1) {
         navigate('/newhire/firstmonth'); 
       } else {
+        // Trigger transition effect
         setSelectedMonthIdentifier(stage.month);
       }
     }, 300);
+  };
+  
+  // Handle AI assistant interaction
+  const handleSendQuestion = (e) => {
+    e.preventDefault();
+    if (!userQuestion.trim()) return;
+    
+    // Add user question to conversation
+    const newUserMessage = {
+      type: 'user',
+      message: userQuestion,
+      timestamp: new Date().toLocaleTimeString()
+    };
+    
+    setAiConversation(prev => [...prev, newUserMessage]);
+    setAiIsThinking(true);
+    setUserQuestion('');
+    
+    // Simulate AI response based on context
+    setTimeout(() => {
+      let aiResponse;
+      
+      if (userQuestion.toLowerCase().includes('setup') || userQuestion.toLowerCase().includes('environment')) {
+        aiResponse = {
+          type: 'ai',
+          message: `For ${selectedStage.knowledgeDomain} setup, I recommend starting with the "${resources[0]?.title || 'Dev Environment Setup Guide'}". Would you like me to guide you through the process step by step?`,
+          timestamp: new Date().toLocaleTimeString()
+        };
+      } else if (userQuestion.toLowerCase().includes('team') || userQuestion.toLowerCase().includes('help')) {
+        const expertName = relevantTeamMembers[0]?.name || 'Sarah Chen';
+        aiResponse = {
+          type: 'ai',
+          message: `For questions about ${selectedStage.knowledgeDomain}, ${expertName} would be your best contact. I've highlighted their information in the "Team Experts" section. Would you like me to facilitate an introduction?`,
+          timestamp: new Date().toLocaleTimeString()
+        };
+      } else {
+        aiResponse = {
+          type: 'ai',
+          message: `During ${selectedStage.title}, you should focus on ${selectedStage.knowledgeDomain}. I've curated the most relevant resources and tasks for this stage in your journey.`,
+          timestamp: new Date().toLocaleTimeString()
+        };
+      }
+      
+      // Add AI response to conversation
+      setAiConversation(prev => [...prev, aiResponse]);
+      setAiIsThinking(false);
+      
+      // Simulate AI learning from interaction
+      setAiLearnProgress(prev => Math.min(prev + 5, 100));
+    }, 1500);
   };
 
   return (
@@ -238,9 +377,10 @@ function TimelineView() {
           <h3 className="ml-3 text-xl font-bold text-gray-800">Journey Timeline</h3>
         </div>
         
-        <div className="relative px-6 py-12">
-          {/* Connecting Line with gradient */}
-          <div className="absolute top-1/2 left-0 right-0 h-3 bg-gradient-to-r from-blue-400 via-purple-500 to-amber-500 transform -translate-y-1/2 z-0 rounded-full shadow-md"></div>
+        {/* Redesigned timeline with clearer labels and spacing */}
+        <div className="relative px-4 py-12">
+          {/* Connecting Line with gradient - now thinner for better aesthetics */}
+          <div className="absolute top-1/2 left-0 right-0 h-2 bg-gradient-to-r from-blue-400 via-purple-500 to-amber-500 transform -translate-y-1/2 z-0 rounded-full shadow-sm"></div>
 
           {/* Stages */}
           <div className="relative flex justify-between z-10">
@@ -252,29 +392,33 @@ function TimelineView() {
               const isFirstMonth = stage.month === 1;
               const isLocked = monthNum > currentProgressMonth;
               const isAnimating = animatingStage === stage.month;
-              
-              // Determine connector colors for gradient effect
-              const gradientFrom = index === 0 ? "from-blue-400" : 
-                                  index === 1 ? "from-purple-400" : 
-                                  index === 2 ? "from-indigo-400" :
-                                  index === 3 ? "from-teal-400" :
-                                  index === 4 ? "from-pink-400" : "from-amber-400";
-              
-              const gradientTo = index === timelineStages.length - 1 ? "to-amber-400" :
-                                index === 4 ? "to-pink-400" :
-                                index === 3 ? "to-teal-400" :
-                                index === 2 ? "to-indigo-400" :
-                                index === 1 ? "to-purple-400" : "to-blue-400";
 
               return (
-                <div key={stage.month} className="relative flex flex-col items-center z-20">
-                  {/* Stage Circle/Node - refined for better visual appeal */}
+                <div key={stage.month} className="relative flex flex-col items-center">
+                  {/* Knowledge domain label - now positioned better */}
+                  <div className={`absolute -top-14 left-1/2 transform -translate-x-1/2 
+                    text-xs px-3 py-1 rounded-full ${stage.domainColor} text-white font-medium
+                    whitespace-nowrap transition-all duration-300
+                    ${(isSelected || isCurrent) ? 'opacity-100' : 'opacity-70'}`}
+                  >
+                    {stage.knowledgeDomain}
+                  </div>
+                  
+                  {/* Month label */}
+                  <div className={`absolute -top-5 left-1/2 transform -translate-x-1/2
+                    text-sm font-medium px-2 py-0.5 bg-white rounded-full shadow-sm border border-gray-100
+                    ${stage.textColor} transition-all duration-300 whitespace-nowrap`}
+                  >
+                    {stage.title}
+                  </div>
+
+                  {/* Stage Circle/Node - now cleaner design */}
                   <button
                     onClick={() => handleStageClick(stage)}
                     disabled={isLocked && !isFirstMonth}
                     className={`
                       relative ${stage.color} ${stage.textColor}
-                      rounded-2xl h-24 w-24 flex flex-col items-center justify-center
+                      rounded-xl h-20 w-20 flex flex-col items-center justify-center
                       font-semibold text-sm border-2 transform transition-all duration-300
                       shadow-md hover:shadow-lg
                       ${isSelected ? `ring-4 ${stage.ringColor} ${stage.borderColor} scale-110 z-30` : `${stage.borderColor}`}
@@ -283,51 +427,81 @@ function TimelineView() {
                       ${isLocked && !isFirstMonth ? 'opacity-60 cursor-not-allowed filter grayscale-[30%]' : 'hover:scale-110'}
                       ${isAnimating ? 'animate-pulse scale-125' : ''}
                       ${isCurrent ? `border-2 ${stage.borderColor}` : ''}
+                      overflow-hidden
                     `}
                     style={{ 
                       boxShadow: isSelected ? `0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1), 0 0 0 2px ${stage.borderColor}` : '' 
                     }}
                     aria-label={isFirstMonth ? `View details for ${stage.title}` : `Select ${stage.title}`}
                   >
+                    {/* NEW: Lock icon for locked months */}
+                    {isLocked && !isFirstMonth && (
+                      <div className="absolute inset-0 bg-gray-50/50 backdrop-blur-[1px] flex items-center justify-center z-30">
+                        <div className="bg-gray-200/80 p-1.5 rounded-full">
+                          <LockClosedIcon className="w-5 h-5 text-gray-600" />
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Circular progress indicator */}
+                    {stage.progress > 0 && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg className="w-20 h-20 absolute" viewBox="0 0 100 100">
+                          <circle 
+                            cx="50" 
+                            cy="50" 
+                            r="46" 
+                            fill="none" 
+                            stroke="rgba(255,255,255,0.3)" 
+                            strokeWidth="8" 
+                          />
+                          <circle 
+                            cx="50" 
+                            cy="50" 
+                            r="46" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeOpacity="0.6"
+                            strokeWidth="8" 
+                            strokeLinecap="round"
+                            strokeDasharray="289.03"
+                            strokeDashoffset={289.03 - (289.03 * stage.progress / 100)}
+                            transform="rotate(-90 50 50)"
+                          />
+                        </svg>
+                      </div>
+                    )}
+
                     {isCompleted && (
-                      <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1 shadow-lg">
-                        <CheckCircleIcon className="w-5 h-5 text-white" />
+                      <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1 shadow-lg z-10">
+                        <CheckCircleIcon className="w-4 h-4 text-white" />
                       </div>
                     )}
-                    {isFirstMonth && (
-                      <div className="absolute -bottom-2 -right-2 bg-blue-600 rounded-full p-1 shadow-lg animate-pulse">
-                        <ArrowRightCircleIcon className="w-5 h-5 text-white" />
+                    
+                    {isFirstMonth && isCurrent && (
+                      <div className="absolute -bottom-1 -right-1 bg-blue-600 rounded-full p-1 shadow-lg animate-pulse z-10">
+                        <ArrowRightCircleIcon className="w-4 h-4 text-white" />
                       </div>
                     )}
-                    <div className="flex flex-col items-center">
-                      <div className={`${stage.iconBg} p-2.5 rounded-full mb-2 text-white shadow-sm`}>
+
+                    <div className="flex flex-col items-center z-10">
+                      <div className={`${stage.iconBg} p-2 rounded-full mb-1 text-white shadow-sm flex items-center justify-center`}>
                         {stage.icon}
                       </div>
-                      <span className="font-semibold text-base">{stage.month}</span>
+                      <span className="font-bold text-base">{typeof stage.month === 'number' ? stage.month : stage.month.split(' ')[0]}</span>
+                      {stage.progress > 0 && (
+                        <span className="text-xs font-medium">{stage.progress}%</span>
+                      )}
                     </div>
-                    {isCurrent && (
-                      <span className="absolute -bottom-7 text-xs font-medium px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full shadow-md">
-                        Current
-                      </span>
-                    )}
                   </button>
 
-                  {/* Title label above the box */}
-                  <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap
-                    text-sm font-medium px-3 py-1 ${stage.textColor} transition-all duration-300
-                    ${isSelected || isCurrent ? 'opacity-100' : 'opacity-70'}`}
-                  >
-                    {stage.title}
-                  </div>
-
-                  {/* Bottom Description - enhanced with animation */}
-                  <div className={`
-                    absolute top-full left-1/2 transform -translate-x-1/2 mt-12 w-52 text-center 
-                    text-xs bg-white p-4 rounded-lg shadow-lg border border-gray-200
-                    transition-all duration-300
-                    ${(isSelected || isCurrent) ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}
-                  `}>
-                    <p className="text-gray-600">{stage.description}</p>
+                  {/* Month information displayed below - clear format for month ranges */}
+                  <div className="absolute top-full pt-3 left-1/2 transform -translate-x-1/2 text-center">
+                    <span className="text-xs inline-block px-2 py-1 bg-white rounded-lg shadow-sm text-gray-600 whitespace-nowrap">
+                      {typeof stage.month === 'string' && stage.month.includes('&') ? 
+                        stage.month.replace('&', '-') : 
+                        `Month ${stage.month}`}
+                    </span>
                   </div>
                 </div>
               );
@@ -336,7 +510,7 @@ function TimelineView() {
         </div>
 
         {/* Journey Progress Indicator */}
-        <div className="mt-16 flex items-center justify-center">
+        <div className="mt-20 flex items-center justify-center">
           <div className="bg-white px-4 py-2 rounded-full shadow-sm border border-indigo-100 flex items-center text-sm">
             <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse mr-2"></div>
             <span className="text-gray-700">
@@ -391,6 +565,15 @@ function TimelineView() {
                     `}
                     aria-label={isFirstMonth ? `View details for ${stage.title}` : `Select ${stage.title}`}
                   >
+                    {/* NEW: Lock icon for locked months */}
+                    {isLocked && !isFirstMonth && (
+                      <div className="absolute inset-0 bg-gray-50/50 backdrop-blur-[1px] flex items-center justify-center z-30">
+                        <div className="bg-gray-200/80 p-1.5 rounded-full">
+                          <LockClosedIcon className="w-5 h-5 text-gray-600" />
+                        </div>
+                      </div>
+                    )}
+                    
                     {isCompleted && (
                       <div className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5 shadow-md">
                         <CheckCircleIcon className="w-3.5 h-3.5 text-white" />
@@ -458,98 +641,458 @@ function TimelineView() {
         </div>
       </div>
 
-      {/* Selected Stage Details */}
+      {/* Selected Stage Details - NEW CONTEXT SWITCHING PANEL */}
       {selectedStage && (
-        <div className="bg-gradient-to-br from-white to-blue-50 p-6 rounded-xl shadow-lg border border-blue-100">
+        <div className={`bg-gradient-to-br from-white to-blue-50 p-6 rounded-xl shadow-lg border border-blue-100 transition-all duration-300 ${contextTransition ? 'opacity-0' : 'opacity-100'}`}>
           <div className="flex items-center mb-6">
             <div className={`${selectedStage.iconBg} p-3 rounded-xl text-white shadow-md mr-4`}>
               {selectedStage.icon}
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-800">
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center">
                 Focus for: {selectedStage.title}
+                <span className={`ml-3 ${selectedStage.domainColor} text-white text-xs px-2 py-1 rounded-full`}>
+                  {selectedStage.knowledgeDomain}
+                </span>
               </h3>
               <p className="text-gray-600 mt-1">{selectedStage.description}</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-            {/* Tasks */}
-            <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-5 rounded-xl border border-blue-100 shadow-md">
-              <h4 className="font-semibold mb-5 text-gray-800 flex items-center">
-                <div className="bg-blue-600 p-1.5 rounded-lg mr-2">
-                  <CheckCircleIcon className="w-4 h-4 text-white" />
-                </div>
-                Key Tasks
-              </h4>
-              {tasks.length > 0 ? (
-                <ul className="space-y-4">
-                  {tasks.map(task => (
-                    <li key={task.id} className="flex items-center text-sm bg-white p-3 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md">
-                      <input
-                        type="checkbox"
-                        className="mr-3 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                        checked={task.completed}
-                        readOnly
-                      />
-                      <span className={`${task.completed ? 'line-through text-gray-500' : 'text-gray-800'} transition-all duration-200`}>
-                        {task.title}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500 italic">No specific tasks listed for this period yet.</p>
-              )}
-            </div>
-
-            {/* Resources */}
-            <div className="bg-gradient-to-br from-gray-50 to-indigo-50 p-5 rounded-xl border border-indigo-100 shadow-md">
-              <h4 className="font-semibold mb-5 text-gray-800 flex items-center">
-                <div className="bg-indigo-600 p-1.5 rounded-lg mr-2">
-                  <DocumentTextIcon className="w-4 h-4 text-white" />
-                </div>
-                Helpful Resources
-              </h4>
-              {resources.length > 0 ? (
-                <ul className="space-y-4">
-                  {resources.map(resource => (
-                    <li key={resource.id} className="bg-white p-3 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md">
-                      <a href="#" className="flex items-center text-sm text-gray-800 hover:text-indigo-600 transition-colors duration-200">
-                        {getResourceIcon(resource.type)}
-                        <span className="hover:underline">{resource.title}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500 italic">No specific resources listed for this period yet.</p>
-              )}
-            </div>
+          {/* Context-Switching Tabs */}
+          <div className="flex border-b border-gray-200 mb-6">
+            <button 
+              className={`px-6 py-3 font-medium text-sm -mb-px ${activeTab === 'overview' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('overview')}
+            >
+              Overview
+            </button>
+            <button 
+              className={`px-6 py-3 font-medium text-sm -mb-px ${activeTab === 'resources' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('resources')}
+            >
+              Resources
+            </button>
+            <button 
+              className={`px-6 py-3 font-medium text-sm -mb-px ${activeTab === 'experts' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('experts')}
+            >
+              Team Experts
+            </button>
+            <button 
+              className={`px-6 py-3 font-medium text-sm -mb-px ${activeTab === 'ai' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('ai')}
+            >
+              AI Assistant
+            </button>
           </div>
 
-          {/* AI Tip Section */}
-          {aiTip && (
-            <div className="mt-8 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl flex items-start shadow-md">
-              <div className="bg-white p-2 rounded-lg shadow-sm mr-4 flex-shrink-0">
-                <ChatBubbleLeftRightIcon className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-blue-800">DevBoost AI Suggestion</p>
-                <p className="text-sm text-blue-700 mt-2">{aiTip}</p>
-                
-                {selectedStage.month === 1 && (
-                  <button 
-                    onClick={() => navigate('/newhire/firstmonth')}
-                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium shadow-sm hover:bg-blue-700 transition-colors duration-200 inline-flex items-center"
-                  >
-                    Go to First Month Experience
-                    <ArrowRightCircleIcon className="ml-2 w-4 h-4" />
-                  </button>
+          {/* Tab Content with AnimatePresence for smooth transitions */}
+          <AnimatePresence mode="wait">
+            {/* Overview Tab */}
+            {activeTab === 'overview' && (
+              <motion.div 
+                key="overview"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4"
+              >
+                {/* Tasks */}
+                <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-5 rounded-xl border border-blue-100 shadow-md">
+                  <h4 className="font-semibold mb-5 text-gray-800 flex items-center">
+                    <div className="bg-blue-600 p-1.5 rounded-lg mr-2">
+                      <CheckCircleIcon className="w-4 h-4 text-white" />
+                    </div>
+                    Key Tasks
+                  </h4>
+                  {tasks.length > 0 ? (
+                    <ul className="space-y-4">
+                      {tasks.map(task => (
+                        <li key={task.id} className="flex items-center text-sm bg-white p-3 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md">
+                          <input
+                            type="checkbox"
+                            className="mr-3 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                            checked={task.completed}
+                            readOnly
+                          />
+                          <span className={`${task.completed ? 'line-through text-gray-500' : 'text-gray-800'} transition-all duration-200`}>
+                            {task.title}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">No specific tasks listed for this period yet.</p>
+                  )}
+                </div>
+
+                {/* AI Tip Section */}
+                {aiTip && (
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl shadow-md p-5">
+                    <h4 className="font-semibold mb-5 text-gray-800 flex items-center">
+                      <div className="bg-indigo-600 p-1.5 rounded-lg mr-2">
+                        <LightBulbIcon className="w-4 h-4 text-white" />
+                      </div>
+                      AI Suggestions
+                    </h4>
+                    <div className="flex">
+                      <div className="bg-white p-2 rounded-lg shadow-sm mr-4 flex-shrink-0">
+                        <ChatBubbleLeftRightIcon className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-blue-700">{aiTip}</p>
+                        
+                        {selectedStage.month === 1 && (
+                          <button 
+                            onClick={() => navigate('/newhire/firstmonth')}
+                            className="mt-4 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium shadow-sm hover:bg-blue-700 transition-colors duration-200 inline-flex items-center"
+                          >
+                            First Month Details
+                            <ArrowRightCircleIcon className="ml-1.5 w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 )}
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+
+            {/* Resources Tab */}
+            {activeTab === 'resources' && (
+              <motion.div 
+                key="resources"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="mt-4"
+              >
+                <div className="bg-white p-4 rounded-lg mb-6 border border-gray-100 shadow-sm">
+                  <h4 className="flex items-center text-md font-medium text-gray-700 mb-3">
+                    <BookOpenIcon className="w-5 h-5 mr-2 text-blue-600" />
+                    Resources filtered for {selectedStage.knowledgeDomain}
+                  </h4>
+                  <p className="text-sm text-gray-500">
+                    Curated materials to help you master the skills needed during this phase of your onboarding.
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {resources.length > 0 ? (
+                    resources.map(resource => (
+                      <motion.div 
+                        key={resource.id} 
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.2 }}
+                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
+                      >
+                        <div className="flex items-start">
+                          <div className={`p-3 rounded-lg ${resource.type === 'document' ? 'bg-blue-100' : 'bg-purple-100'} mr-4 flex-shrink-0`}>
+                            {getResourceIcon(resource.type)}
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-gray-800 mb-1">{resource.title}</h5>
+                            <p className="text-xs text-gray-500 mb-3">
+                              {resource.type === 'document' ? 'Documentation • 5 min read' : 'Video • 10 min watch'}
+                            </p>
+                            <div className="flex items-center">
+                              <div className="flex-1">
+                                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                  <div className="h-full bg-blue-500 rounded-full" style={{ width: '0%' }}></div>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Not started</p>
+                              </div>
+                              <button className="ml-3 px-3 py-1 bg-blue-600 text-white text-xs rounded-lg">Start</button>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-12">
+                      <DocumentTextIcon className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                      <p className="text-gray-500">No resources available for this period yet.</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Additional recommended resources */}
+                <div className="mt-8 bg-blue-50 rounded-lg p-4 border border-blue-100">
+                  <h5 className="text-sm font-medium text-blue-700 mb-3 flex items-center">
+                    <SparklesIcon className="w-4 h-4 mr-2" />
+                    AI-Recommended Additional Resources
+                  </h5>
+                  <div className="text-xs text-gray-600 bg-white p-3 rounded-lg">
+                    <p>Based on your progress and interests, our AI suggests these additional resources:</p>
+                    <ul className="mt-2 space-y-2">
+                      <li className="flex items-center">
+                        <div className="w-1 h-1 bg-blue-400 rounded-full mr-2"></div>
+                        <span>Advanced {selectedStage.knowledgeDomain} techniques</span>
+                      </li>
+                      <li className="flex items-center">
+                        <div className="w-1 h-1 bg-blue-400 rounded-full mr-2"></div>
+                        <span>Real-world case studies from senior engineers</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Team Experts Tab */}
+            {activeTab === 'experts' && (
+              <motion.div 
+                key="experts"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="mt-4"
+              >
+                <div className="bg-white p-4 rounded-lg mb-6 border border-gray-100 shadow-sm">
+                  <h4 className="flex items-center text-md font-medium text-gray-700 mb-2">
+                    <UserGroupIcon className="w-5 h-5 mr-2 text-purple-600" />
+                    {relevantTeamMembers.length > 0 ? 
+                      `Team members with expertise in ${selectedStage.knowledgeDomain}` : 
+                      'Team Experts'
+                    }
+                  </h4>
+                  <p className="text-sm text-gray-500">
+                    These team members can help you with questions specific to this area.
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {relevantTeamMembers.length > 0 ? (
+                    relevantTeamMembers.map(member => (
+                      <motion.div 
+                        key={member.id}
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.2 }}
+                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all"
+                      >
+                        <div className="flex">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 text-white flex items-center justify-center font-bold text-lg mr-4">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-gray-800">{member.name}</h5>
+                            <p className="text-xs text-gray-500 mb-2">{member.role}</p>
+                            <div>
+                              {member.expertise.map((exp, i) => (
+                                <span 
+                                  key={i} 
+                                  className={`inline-block text-xs mr-2 mb-2 px-2 py-1 rounded-full ${
+                                    exp === selectedStage.knowledgeDomain ? 
+                                    'bg-blue-100 text-blue-700 border border-blue-200' : 
+                                    'bg-gray-100 text-gray-600'
+                                  }`}
+                                >
+                                  {exp}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex justify-end">
+                          <button className="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-xs rounded-lg mr-2">
+                            Message
+                          </button>
+                          <button className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg">
+                            Schedule Meeting
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-12">
+                      <UserGroupIcon className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                      <p className="text-gray-500">No specific experts assigned for this period yet.</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* AI Assistant Tab */}
+            {activeTab === 'ai' && (
+              <motion.div 
+                key="ai"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4"
+              >
+                {/* AI Chat Interface */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 text-white">
+                    <h4 className="text-base font-semibold flex items-center">
+                      <SparklesIcon className="w-5 h-5 mr-2" />
+                      DevBoost AI Assistant
+                    </h4>
+                    <p className="text-xs text-blue-100 mt-0.5">
+                      Context-aware for {selectedStage.title} • {selectedStage.knowledgeDomain}
+                    </p>
+                  </div>
+                  
+                  {/* Chat Messages */}
+                  <div className="h-60 overflow-y-auto p-3 flex flex-col space-y-3">
+                    {aiConversation.map((msg, index) => (
+                      <div 
+                        key={index} 
+                        className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div 
+                          className={`
+                            max-w-[80%] p-2 rounded-lg 
+                            ${msg.type === 'user' 
+                              ? 'bg-blue-50 text-gray-800 rounded-br-none' 
+                              : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-bl-none'
+                            }
+                          `}
+                        >
+                          <p className="text-xs">{msg.message}</p>
+                          <p className="text-[10px] opacity-70 text-right mt-1">{msg.timestamp}</p>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* AI Thinking Indicator */}
+                    {aiIsThinking && (
+                      <div className="flex justify-start">
+                        <div className="bg-gray-100 p-2 rounded-lg flex items-center">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '600ms' }}></div>
+                          </div>
+                          <span className="ml-2 text-xs text-gray-500">DevBoost AI is thinking...</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Chat Input */}
+                  <form 
+                    onSubmit={handleSendQuestion}
+                    className="border-t border-gray-200 p-3 flex"
+                  >
+                    <input
+                      type="text"
+                      value={userQuestion}
+                      onChange={(e) => setUserQuestion(e.target.value)}
+                      placeholder={`Ask about ${selectedStage.knowledgeDomain}...`}
+                      className="flex-grow rounded-l-lg border-gray-300 text-sm"
+                    />
+                    <button
+                      type="submit"
+                      className="bg-blue-600 text-white px-3 py-2 rounded-r-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                    >
+                      Send
+                    </button>
+                  </form>
+                </div>
+                
+                {/* AI Learning Visualization */}
+                <div className="bg-gradient-to-br from-gray-50 to-purple-50 rounded-xl border border-purple-100 p-5 shadow-md">
+                  <h4 className="font-semibold mb-5 text-gray-800 flex items-center">
+                    <div className="bg-purple-600 p-1.5 rounded-lg mr-2">
+                      <AcademicCapIcon className="w-4 h-4 text-white" />
+                    </div>
+                    How DevBoost AI Learns From You
+                  </h4>
+                  
+                  {/* AI Learning Progress */}
+                  <div className="bg-white rounded-lg p-4 border border-gray-100 mb-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="font-medium text-gray-700">AI Learning Progress</span>
+                      <span className="text-blue-600 font-medium">{aiLearnProgress}%</span>
+                    </div>
+                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${aiLearnProgress}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      The more you interact, the better the AI understands your needs
+                    </p>
+                  </div>
+                  
+                  {/* Knowledge Areas */}
+                  <div className="space-y-3">
+                    <h5 className="text-sm font-medium text-gray-700">AI Knowledge Areas</h5>
+                    
+                    {/* Company-Specific Knowledge */}
+                    <div className="bg-white p-3 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                            <BriefcaseIcon className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-800">Company-Specific</p>
+                            <div className="flex items-center">
+                              <div className="w-20 h-1.5 bg-gray-100 rounded-full mr-2">
+                                <div className="h-full bg-blue-500 rounded-full" style={{ width: '60%' }}></div>
+                              </div>
+                              <span className="text-xs text-gray-500">60%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Technical Knowledge */}
+                    <div className="bg-white p-3 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                            <CodeBracketIcon className="w-4 h-4 text-indigo-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-800">Technical</p>
+                            <div className="flex items-center">
+                              <div className="w-20 h-1.5 bg-gray-100 rounded-full mr-2">
+                                <div className="h-full bg-indigo-500 rounded-full" style={{ width: '85%' }}></div>
+                              </div>
+                              <span className="text-xs text-gray-500">85%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Personal Preferences */}
+                    <div className="bg-white p-3 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                            <CogIcon className="w-4 h-4 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-800">Your Preferences</p>
+                            <div className="flex items-center">
+                              <div className="w-20 h-1.5 bg-gray-100 rounded-full mr-2">
+                                <div className="h-full bg-green-500 rounded-full" style={{ width: '35%' }}></div>
+                              </div>
+                              <span className="text-xs text-gray-500">35%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
     </div>
