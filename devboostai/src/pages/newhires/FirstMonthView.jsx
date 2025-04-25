@@ -4,6 +4,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 // Import components
 import EmotionMonitor from '../../components/EmotionMonitor';
+import EmotionSensingBar from '../../components/EmotionSensingBar';
 import LearningPathSection from '../../components/dashboard/LearningPathSection';
 import TechnicalSetupGuide from '../../components/dashboard/TechnicalSetupGuide';
 import TeamMembersSection from '../../components/dashboard/TeamMembersSection';
@@ -166,6 +167,9 @@ function FirstMonthView() {
           </button>
         </div>
       </div>
+      
+      {/* Emotion Sensing Bar - Added at top */}
+      <EmotionSensingBar />
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -179,7 +183,7 @@ function FirstMonthView() {
             setActiveSkill={setActiveSkill}
           />
           
-          {/* AI Assistant */}
+          {/* AI Assistant - Still keeping this for chat functionality only */}
           <EmotionMonitor 
             onResourceHighlight={handleResourceHighlight}
             onTeamMemberSelect={handleTeamMemberSelect}
