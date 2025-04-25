@@ -396,7 +396,7 @@ function TimelineView() {
               return (
                 <div key={stage.month} className="relative flex flex-col items-center">
                   {/* Knowledge domain label - now positioned better */}
-                  <div className={`absolute -top-14 left-1/2 transform -translate-x-1/2 
+                  <div className={`absolute -top-20 left-1/2 transform -translate-x-1/2 
                     text-xs px-3 py-1 rounded-full ${stage.domainColor} text-white font-medium
                     whitespace-nowrap transition-all duration-300
                     ${(isSelected || isCurrent) ? 'opacity-100' : 'opacity-70'}`}
@@ -404,9 +404,9 @@ function TimelineView() {
                     {stage.knowledgeDomain}
                   </div>
                   
-                  {/* Month label */}
-                  <div className={`absolute -top-5 left-1/2 transform -translate-x-1/2
-                    text-sm font-medium px-2 py-0.5 bg-white rounded-full shadow-sm border border-gray-100
+                  {/* Month label - increased top margin to prevent overlap */}
+                  <div className={`absolute -top-10 left-1/2 transform -translate-x-1/2
+                    text-sm font-medium px-3 py-1 bg-white rounded-full shadow-sm border border-gray-100
                     ${stage.textColor} transition-all duration-300 whitespace-nowrap`}
                   >
                     {stage.title}
@@ -565,23 +565,23 @@ function TimelineView() {
                     `}
                     aria-label={isFirstMonth ? `View details for ${stage.title}` : `Select ${stage.title}`}
                   >
-                    {/* NEW: Lock icon for locked months */}
+                    {/* Lock icon for locked months */}
                     {isLocked && !isFirstMonth && (
                       <div className="absolute inset-0 bg-gray-50/50 backdrop-blur-[1px] flex items-center justify-center z-30">
-                        <div className="bg-gray-200/80 p-1.5 rounded-full">
-                          <LockClosedIcon className="w-5 h-5 text-gray-600" />
+                        <div className="bg-gray-200/80 p-1 rounded-full">
+                          <LockClosedIcon className="w-4 h-4 text-gray-600" />
                         </div>
                       </div>
                     )}
                     
                     {isCompleted && (
-                      <div className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5 shadow-md">
-                        <CheckCircleIcon className="w-3.5 h-3.5 text-white" />
+                      <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-0.5 shadow-md">
+                        <CheckCircleIcon className="w-3 h-3 text-white" />
                       </div>
                     )}
                     {isFirstMonth && isCurrent && (
-                      <div className="absolute -bottom-1.5 -right-1.5 bg-blue-600 rounded-full p-0.5 shadow-md animate-pulse">
-                        <ArrowRightCircleIcon className="w-3.5 h-3.5 text-white" />
+                      <div className="absolute -bottom-1 -right-1 bg-blue-600 rounded-full p-0.5 shadow-md animate-pulse">
+                        <ArrowRightCircleIcon className="w-3 h-3 text-white" />
                       </div>
                     )}
                     <div className={`${stage.iconBg} p-1.5 rounded-full mb-1 text-white shadow-sm`}>
@@ -591,7 +591,7 @@ function TimelineView() {
                   </button>
 
                   {/* Stage details - enhanced with better visual styling */}
-                  <div className={`flex-1 pt-1 ${activeStateClasses} ${isSelected ? '' : 'opacity-85'}`}>
+                  <div className={`flex-1 pt-1 ${activeStateClasses}`}>
                     <div className="flex justify-between items-center">
                       <h4 className={`font-medium text-sm flex items-center ${stage.textColor}`}>
                         {stage.title}
@@ -612,12 +612,19 @@ function TimelineView() {
                       )}
                     </div>
                     
-                    <p className={`text-xs text-gray-600 mt-1.5 transition-all duration-300 ${isSelected ? 'max-h-96 opacity-100' : 'max-h-24 opacity-85'}`}>
+                    <p className={`text-xs text-gray-600 mt-1.5 ${isSelected ? 'line-clamp-none' : 'line-clamp-2'}`}>
                       {stage.description}
                     </p>
                     
+                    {/* Knowledge domain badge */}
+                    <div className="mt-2">
+                      <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${stage.domainColor} text-white`}>
+                        {stage.knowledgeDomain}
+                      </span>
+                    </div>
+                    
                     {isSelected && (
-                      <div className={`mt-2.5 bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-${stage.borderColor.split('-')[1]}-100 shadow-sm transition-all duration-500 ${isSelected ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+                      <div className="mt-3 bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-gray-200 shadow-sm transition-all duration-300">
                         <p className="text-xs font-medium text-gray-700">
                           {index === 0 ? "Click 'View' to see detailed information" : "More information will be available as you progress."}
                         </p>
