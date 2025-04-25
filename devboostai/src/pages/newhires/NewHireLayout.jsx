@@ -1,9 +1,85 @@
 // src/pages/newhires/NewHireLayout.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { UserIcon, BellIcon, LightBulbIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import EmotionMonitor from '../../components/EmotionMonitor';
+import { useEmotion } from '../../services/EmotionContext';
 
 function NewHireLayout() {
+  const { currentEmotion, processUserInput, getContentAdaptation } = useEmotion();
+  const [showEmotionPanel, setShowEmotionPanel] = useState(false);
+  const [adaptiveTip, setAdaptiveTip] = useState('');
+  
+  // Process user activity for emotion detection
+  useEffect(() => {
+    // Simulate processing user interaction data periodically
+    const interval = setInterval(() => {
+      const userActivities = [
+        'scrolled content quickly',
+        'spent time reading documentation',
+        'completed a task',
+        'hovered over advanced topic',
+        'asked a question about setup'
+      ];
+      
+      // Randomly pick a simulated activity
+      const randomActivity = userActivities[Math.floor(Math.random() * userActivities.length)];
+      
+      // Process the activity through emotion detection
+      processUserInput(randomActivity, 'activity');
+    }, 35000); // Every 35 seconds
+    
+    return () => clearInterval(interval);
+  }, [processUserInput]);
+  
+  // Update adaptive content based on emotion
+  useEffect(() => {
+    const adaptation = getContentAdaptation();
+    const tips = {
+      'frustrated': [
+        "Taking a step back can help. Let's break this down into simpler steps.",
+        "I notice you might be getting stuck. Would you like to see a simpler explanation?",
+        "Let's slow down and focus on just one concept at a time."
+      ],
+      'confused': [
+        "This concept can be tricky. Here's a visual explanation that might help.",
+        "Let's approach this from a different angle with a practical example.",
+        "Many people find this challenging at first. Here's an analogy that might help."
+      ],
+      'excited': [
+        "You're on a roll! Here's an extra challenge if you're interested.",
+        "Great progress! Ready to explore some advanced concepts?",
+        "Your enthusiasm is fantastic! Let me show you how this connects to real projects."
+      ],
+      'bored': [
+        "Let's skip ahead to something more challenging.",
+        "How about trying a hands-on exercise instead of reading more theory?",
+        "Ready for a quick challenge to apply what you've learned?"
+      ],
+      'anxious': [
+        "Many new team members feel this way. You're doing great!",
+        "Let's break this down into smaller, manageable steps.",
+        "Take a deep breath - you don't need to master everything at once."
+      ],
+      'interested': [
+        "I can see you're engaged with this topic. Here's a deeper dive if you'd like.",
+        "Great focus! Let me enhance this with some real-world context.",
+        "Your curiosity will serve you well! Here's how this connects to other areas."
+      ],
+      'neutral': [
+        "Here's what's coming up next in your onboarding journey.",
+        "Remember you can always ask questions as we go.",
+        "Let me know if you'd like to adjust the pace of your learning."
+      ]
+    };
+    
+    // Select a random tip based on current emotion
+    const emotionTips = tips[currentEmotion] || tips.neutral;
+    const randomTip = emotionTips[Math.floor(Math.random() * emotionTips.length)];
+    
+    setAdaptiveTip(randomTip);
+  }, [currentEmotion, getContentAdaptation]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50">
       {/* Header with vibrant gradient background */}
@@ -76,9 +152,91 @@ function NewHireLayout() {
         </div>
       </header>
 
+      {/* Adaptive Tip Banner */}
+      {adaptiveTip && (
+        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-start">
+              <div className="flex-shrink-0 mt-0.5">
+                <div className="p-1 bg-blue-100 rounded-full">
+                  <SparklesIcon className="h-4 w-4 text-blue-600" />
+                </div>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-800">
+                  <span className="font-medium">AI Assistant: </span>
+                  {adaptiveTip}
+                </p>
+              </div>
+              <div className="ml-auto">
+                <button
+                  onClick={() => setShowEmotionPanel(!showEmotionPanel)}
+                  className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  {showEmotionPanel ? 'Hide AI details' : 'How does this work?'}
+                </button>
+              </div>
+            </div>
+            
+            {/* Expanded AI explanation panel */}
+            {showEmotionPanel && (
+              <div className="mt-3 bg-white/80 backdrop-blur-sm rounded-lg border border-blue-100 p-3 shadow-sm">
+                <p className="text-xs text-gray-600 mb-2">
+                  DevBoost AI uses emotion-sensing technology to adapt your onboarding experience in real-time:
+                </p>
+                <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc">
+                  <li>Real-time sentiment analysis detects your emotional state</li>
+                  <li>Content adapts automatically based on your engagement level</li>
+                  <li>Your manager receives insights to provide personalized support</li>
+                </ul>
+                <div className="mt-2 pt-2 border-t border-blue-50">
+                  <div className="flex justify-end">
+                    <button
+                      className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 px-2 py-1 rounded transition-colors"
+                      onClick={() => setShowEmotionPanel(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Outlet />
+        {/* Add the EmotionMonitor component to the sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-3">
+            <Outlet />
+          </div>
+          <div className="space-y-6">
+            <EmotionMonitor />
+            
+            {/* Additional AI tools panel */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-500 to-indigo-600 px-4 py-3">
+                <h2 className="text-white text-sm font-medium">AI Onboarding Tools</h2>
+              </div>
+              <div className="p-4 space-y-3">
+                <button className="w-full text-left px-3 py-2 bg-indigo-50 hover:bg-indigo-100 rounded-md text-sm text-indigo-700 transition-colors flex items-center">
+                  <SparklesIcon className="h-4 w-4 mr-2" />
+                  AI Onboarding Assistant
+                </button>
+                <button className="w-full text-left px-3 py-2 bg-purple-50 hover:bg-purple-100 rounded-md text-sm text-purple-700 transition-colors flex items-center">
+                  <UserIcon className="h-4 w-4 mr-2" />
+                  Team Connection Helper
+                </button>
+                <button className="w-full text-left px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-md text-sm text-blue-700 transition-colors flex items-center">
+                  <LightBulbIcon className="h-4 w-4 mr-2" />
+                  Learning Path Optimizer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
 
       {/* Floating help button */}
@@ -88,6 +246,11 @@ function NewHireLayout() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </button>
+      </div>
+      
+      {/* Floating compact emotion monitor for mobile */}
+      <div className="lg:hidden">
+        <EmotionMonitor compact={true} />
       </div>
     </div>
   );

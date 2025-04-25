@@ -16,6 +16,7 @@ import {
   ChartBarIcon,
   DocumentChartBarIcon
 } from '@heroicons/react/24/outline';
+import ManagerEmotionInsights from '../../components/ManagerEmotionInsights';
 
 // Import images
 import JY1 from '../../images/JY1.png';
@@ -25,10 +26,22 @@ import QY2 from '../../images/QY2.jpg';
 
 // --- Mock Data ---
 const mockTeamMembers = [
-  { id: 'tm1', name: 'Sarah Chen', role: 'Software Engineer I', startDate: '2025-03-15', currentMonthInJourney: 2, progressPercent: 45, productivity: 'Needs Support', avatar: JY1, tasks: { completed: 12, total: 25 } },
-  { id: 'tm2', name: 'James Wilson', role: 'Software Engineer II', startDate: '2025-02-01', currentMonthInJourney: 3, progressPercent: 75, productivity: 'Exceeding', avatar: QY1, tasks: { completed: 30, total: 35 } },
-  { id: 'tm3', name: 'Priya Patel', role: 'Software Engineer I', startDate: '2025-04-01', currentMonthInJourney: 1, progressPercent: 85, productivity: 'On Track', avatar: JY2, tasks: { completed: 8, total: 10 } },
-  { id: 'tm4', name: 'Michael Brown', role: 'Senior Software Engineer', startDate: '2024-12-01', currentMonthInJourney: 5, progressPercent: 60, productivity: 'On Track', avatar: QY2, tasks: { completed: 42, total: 50 } },
+  { id: 'tm1', name: 'Sarah Chen', role: 'Software Engineer I', startDate: '2025-03-15', currentMonthInJourney: 2, progressPercent: 45, productivity: 'Needs Support', avatar: JY1, tasks: { completed: 12, total: 25 }, 
+    recentInteractions: "Attended frontend code review session; Asked questions about API integration patterns; Participated in team standup and shared blocker on auth implementation", 
+    onboardingProgress: 45,
+    triggers: ["API documentation confusion", "Build system errors"] },
+  { id: 'tm2', name: 'James Wilson', role: 'Software Engineer II', startDate: '2025-02-01', currentMonthInJourney: 3, progressPercent: 75, productivity: 'Exceeding', avatar: QY1, tasks: { completed: 30, total: 35 }, 
+    recentInteractions: "Submitted first PR with excellent code quality; Led knowledge sharing session on React hooks; Helped Sarah troubleshoot API connection issue", 
+    onboardingProgress: 75,
+    triggers: ["Positive feedback from senior engineers"] },
+  { id: 'tm3', name: 'Priya Patel', role: 'Software Engineer I', startDate: '2025-04-01', currentMonthInJourney: 1, progressPercent: 85, productivity: 'On Track', avatar: JY2, tasks: { completed: 8, total: 10 }, 
+    recentInteractions: "Completed initial setup training with zero issues; Finished security protocols training ahead of schedule; Requested additional learning resources on database design", 
+    onboardingProgress: 25,
+    triggers: ["Fast progress through initial modules"] },
+  { id: 'tm4', name: 'Michael Brown', role: 'Senior Software Engineer', startDate: '2024-12-01', currentMonthInJourney: 5, progressPercent: 60, productivity: 'On Track', avatar: QY2, tasks: { completed: 42, total: 50 }, 
+    recentInteractions: "Led knowledge sharing session on system architecture; Submitted architectural proposal for new microservice; Mentoring James on advanced deployment strategies", 
+    onboardingProgress: 90,
+    triggers: ["Contribution to architectural decisions"] },
 ];
 
 // Enhanced mock data for team analytics with trending indicators
@@ -1097,6 +1110,14 @@ function ManagerDashboard() {
                           View details <ChevronRightIcon className="w-3.5 h-3.5 ml-1"/>
                         </button>
                       </div>
+                    </div>
+
+                    {/* Recent Interactions Section */}
+                    <div className="mt-4 border-t border-gray-200/80 pt-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">Recent Interactions</span>
+                      </div>
+                      <p className="text-sm text-gray-600">{member.recentInteractions}</p>
                     </div>
                   </div> // End member card
                 );
