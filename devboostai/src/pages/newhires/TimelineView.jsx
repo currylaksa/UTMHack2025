@@ -370,7 +370,7 @@ function TimelineView() {
 
       {/* Timeline Visualization - Desktop View (hidden on mobile) */}
       <div className="bg-gradient-to-br from-white to-indigo-50 p-8 rounded-xl shadow-lg border border-indigo-100 hidden md:block">
-        <div className="flex items-center mb-6">
+        <div className="flex items-center mb-12">
           <div className="bg-indigo-100 p-2 rounded-lg">
             <CalendarIcon className="h-6 w-6 text-indigo-600" />
           </div>
@@ -378,7 +378,7 @@ function TimelineView() {
         </div>
         
         {/* Redesigned timeline with clearer labels and spacing */}
-        <div className="relative px-4 py-12">
+        <div className="relative px-4 py-16">
           {/* Connecting Line with gradient - now thinner for better aesthetics */}
           <div className="absolute top-1/2 left-0 right-0 h-2 bg-gradient-to-r from-blue-400 via-purple-500 to-amber-500 transform -translate-y-1/2 z-0 rounded-full shadow-sm"></div>
 
@@ -495,14 +495,14 @@ function TimelineView() {
                     </div>
                   </button>
 
-                  {/* Month information displayed below - clear format for month ranges */}
-                  <div className="absolute top-full pt-3 left-1/2 transform -translate-x-1/2 text-center">
+                  {/* Month information displayed below - REMOVING THIS REDUNDANT SECTION */}
+                  {/* <div className="absolute top-full pt-3 left-1/2 transform -translate-x-1/2 text-center">
                     <span className="text-xs inline-block px-2 py-1 bg-white rounded-lg shadow-sm text-gray-600 whitespace-nowrap">
                       {typeof stage.month === 'string' && stage.month.includes('&') ? 
                         stage.month.replace('&', '-') : 
                         `Month ${stage.month}`}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
               );
             })}
