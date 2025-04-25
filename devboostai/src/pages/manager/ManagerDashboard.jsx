@@ -12,400 +12,28 @@ import {
   CalendarIcon,
   ArrowTrendingUpIcon,
   SparklesIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
+  DocumentChartBarIcon
 } from '@heroicons/react/24/outline';
+import ManagerEmotionInsights from '../../components/ManagerEmotionInsights';
 
-// Import images
-import JY1 from '../../images/JY1.png';
-import JY2 from '../../images/JY2.jpg';
-import QY1 from '../../images/QY1.png';
-import QY2 from '../../images/QY2.jpg';
+// Import components
+import Avatar from '../../components/dashboard/Avatar';
+import Badge from '../../components/dashboard/Badge';
+import DashboardHeader from '../../components/dashboard/DashboardHeader';
+import ProgressBar from '../../components/dashboard/ProgressBar';
+import StatCard from '../../components/dashboard/StatCard';
+import TeamProgressChart from '../../components/dashboard/TeamProgressChart';
+import ComparativeBenchmarks from '../../components/dashboard/ComparativeBenchmarks';
+import PredictiveAnalytics from '../../components/dashboard/PredictiveAnalytics';
+import InsightCard from '../../components/dashboard/InsightCard';
+import ScheduleMeetingButton from '../../components/dashboard/ScheduleMeetingButton';
 
-// --- Mock Data ---
-const mockTeamMembers = [
-  { id: 'tm1', name: 'Sarah Chen', role: 'Software Engineer I', startDate: '2025-03-15', currentMonthInJourney: 2, progressPercent: 45, productivity: 'Needs Support', avatar: JY1, tasks: { completed: 12, total: 25 } },
-  { id: 'tm2', name: 'James Wilson', role: 'Software Engineer II', startDate: '2025-02-01', currentMonthInJourney: 3, progressPercent: 75, productivity: 'Exceeding', avatar: QY1, tasks: { completed: 30, total: 35 } },
-  { id: 'tm3', name: 'Priya Patel', role: 'Software Engineer I', startDate: '2025-04-01', currentMonthInJourney: 1, progressPercent: 85, productivity: 'On Track', avatar: JY2, tasks: { completed: 8, total: 10 } },
-  { id: 'tm4', name: 'Michael Brown', role: 'Senior Software Engineer', startDate: '2024-12-01', currentMonthInJourney: 5, progressPercent: 60, productivity: 'On Track', avatar: QY2, tasks: { completed: 42, total: 50 } },
-];
+// Import utilities
+import { formatDate, daysSince, getMonthTitle, getProductivityClass } from '../../utils/dashboardUtils';
 
-const mockAiInsights = [
-  {
-    id: 'ai1',
-    title: 'Support Needed',
-    text: 'Sarah Chen may need additional support with technical environment setup. Consider scheduling a pairing session.',
-    type: 'warning',
-    priority: 'high',
-    relatedMember: 'tm1',
-    createdAt: '2025-04-15T10:30:00'
-  },
-  {
-    id: 'ai2',
-    title: 'Exceeding Expectations',
-    text: 'James Wilson is progressing quickly through onboarding milestones and may be ready for more challenging tasks.',
-    type: 'info',
-    priority: 'medium',
-    relatedMember: 'tm2',
-    createdAt: '2025-04-14T15:45:00'
-  },
-  {
-    id: 'ai3',
-    title: 'Team Recommendation',
-    text: 'Schedule a team sync next week to address common questions about the deployment process.',
-    type: 'recommendation',
-    priority: 'medium',
-    relatedMember: null,
-    createdAt: '2025-04-13T09:15:00'
-  },
-];
-
-// Utility functions
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
-
-const daysSince = (date) => {
-  const today = new Date();
-  // Ensure 'date' is a Date object before comparison
-  const startDate = date instanceof Date ? date : new Date(date);
-  if (isNaN(startDate)) return 0; // Handle invalid date input
-  const diffTime = Math.abs(today - startDate);
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-};
-
-const getMonthTitle = (monthNum) => {
-  if (monthNum <= 1) return "Pre-boarding / Setup";
-  if (monthNum <= 2) return "Training & Goals";
-  if (monthNum <= 4) return "Culture & HR Check";
-  if (monthNum <= 7) return "Continued Training";
-  if (monthNum <= 10) return "Skill Review / Impact";
-  return "Retention / Development";
-};
-
-const getProductivityClass = (productivity) => {
-  // FIX: Added optional chaining (?.) to prevent errors if productivity is null/undefined
-  switch (productivity?.toLowerCase()) {
-    case 'on track':
-      return 'bg-green-100 text-green-800';
-    case 'needs support':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'at risk':
-      return 'bg-red-100 text-red-800';
-    case 'exceeding':
-      return 'bg-blue-100 text-blue-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-// Component definitions
-const DashboardHeader = ({ title, subtitle, actions }) => (
-  <header className="mb-6 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 shadow-lg p-6 text-white">
-    <div className="md:flex md:items-center md:justify-between">
-      <div className="flex-1 min-w-0">
-        <h1 className="text-2xl md:text-3xl font-bold leading-tight flex items-center">
-          <RocketLaunchIcon className="h-8 w-8 mr-3 text-yellow-300" />
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="mt-2 text-sm md:text-md text-blue-100">{subtitle}</p>
-        )}
-      </div>
-      {actions && actions.length > 0 && (
-        <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
-          {actions.map((action, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={action.onClick}
-              className={`inline-flex items-center px-3 py-2 border rounded-md shadow-sm text-sm font-medium transition-all duration-200 ${
-                action.variant === 'primary'
-                  ? 'border-transparent text-indigo-700 bg-white hover:bg-blue-50 focus:ring-offset-indigo-600'
-                  : 'border-blue-300 text-white bg-blue-700 bg-opacity-30 hover:bg-opacity-50 focus:ring-offset-blue-600'
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
-            >
-              {action.icon && <span className="mr-2">{action.icon}</span>}
-              {action.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  </header>
-);
-
-const Avatar = ({ src, alt, size = 'md', status }) => {
-  const sizeClasses = {
-    sm: 'h-8 w-8',
-    md: 'h-10 w-10',
-    lg: 'h-12 w-12'
-  };
-
-  const statusColors = {
-    success: 'bg-green-400',
-    info: 'bg-blue-400',
-    warning: 'bg-yellow-400',
-    danger: 'bg-red-400'
-  };
-
-  return (
-    <div className="flex-shrink-0 relative">
-      <img
-        className={`${sizeClasses[size]} rounded-full object-cover shadow-sm border-2 border-gray-200`}
-        // Provide a default empty string or a placeholder if src might be missing
-        src={src || '/path/to/default-avatar.png'}
-        alt={alt}
-      />
-      {status && (
-        <span
-          className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white ${statusColors[status]}`}
-        />
-      )}
-    </div>
-  );
-};
-
-const Badge = ({ label, color = 'gray', size = 'md' }) => {
-  const colorClasses = {
-    gray: 'bg-gray-100 text-gray-800',
-    blue: 'bg-blue-100 text-blue-800',
-    green: 'bg-green-100 text-green-800',
-    yellow: 'bg-yellow-100 text-yellow-800',
-    red: 'bg-red-100 text-red-800',
-    purple: 'bg-purple-100 text-purple-800',
-    teal: 'bg-teal-100 text-teal-800',
-    indigo: 'bg-indigo-100 text-indigo-800',
-    pink: 'bg-pink-100 text-pink-800'
-  };
-
-  const sizeClasses = {
-    sm: 'px-2 py-0.5 text-xs',
-    md: 'px-2.5 py-0.5 text-xs',
-    lg: 'px-3 py-1 text-sm'
-  };
-
-  return (
-    <span className={`inline-flex rounded-full font-medium ${colorClasses[color] || colorClasses.gray} ${sizeClasses[size]}`}>
-      {label}
-    </span>
-  );
-};
-
-const ProgressBar = ({ percent, color = 'blue', height = 'h-2.5' }) => {
-  const colorClasses = {
-    gray: 'bg-gray-500',
-    blue: 'bg-blue-500',
-    green: 'bg-green-500',
-    yellow: 'bg-yellow-500',
-    red: 'bg-red-500',
-    purple: 'bg-purple-500',
-    teal: 'bg-teal-500',
-    indigo: 'bg-indigo-500',
-    pink: 'bg-pink-500'
-  };
-
-  return (
-    <div className={`w-full bg-gray-200 rounded-full overflow-hidden ${height}`}>
-      <div
-        className={`${height} rounded-full ${colorClasses[color] || colorClasses.blue}`}
-        style={{ width: `${percent}%`, transition: 'width 1s ease-in-out' }}
-      />
-    </div>
-  );
-};
-
-const StatCard = ({ icon: Icon, title, value, subtext, color, trend, linkText, linkHref, onClick }) => {
-  // Define gradient backgrounds based on colors
-  const gradientBgs = {
-    blue: 'bg-gradient-to-br from-blue-50 to-blue-100',
-    green: 'bg-gradient-to-br from-green-50 to-green-100',
-    yellow: 'bg-gradient-to-br from-yellow-50 to-yellow-100',
-    red: 'bg-gradient-to-br from-red-50 to-red-100',
-    purple: 'bg-gradient-to-br from-purple-50 to-purple-100',
-    teal: 'bg-gradient-to-br from-teal-50 to-teal-100',
-    indigo: 'bg-gradient-to-br from-indigo-50 to-indigo-100',
-    pink: 'bg-gradient-to-br from-pink-50 to-pink-100',
-    gray: 'bg-gradient-to-br from-gray-50 to-gray-100'
-  };
-
-  const iconBgs = {
-    blue: 'bg-blue-100',
-    green: 'bg-green-100',
-    yellow: 'bg-yellow-100',
-    red: 'bg-red-100',
-    purple: 'bg-purple-100',
-    teal: 'bg-teal-100',
-    indigo: 'bg-indigo-100',
-    pink: 'bg-pink-100',
-    gray: 'bg-gray-100'
-  };
-
-  const iconColors = {
-    blue: 'text-blue-600',
-    green: 'text-green-600',
-    yellow: 'text-yellow-600',
-    red: 'text-red-600',
-    purple: 'text-purple-600',
-    teal: 'text-teal-600',
-    indigo: 'text-indigo-600',
-    pink: 'text-pink-600',
-    gray: 'text-gray-600'
-  };
-
-  // FIX: Use a default color if the provided one is invalid
-  const colorToUse = color && gradientBgs[color] ? color : 'gray';
-
-  return (
-    <div className={`overflow-hidden shadow-md rounded-xl border border-gray-200 transition-all duration-300 hover:shadow-lg ${gradientBgs[colorToUse]}`}>
-      <div className="p-4">
-        <div className="flex items-center">
-          <div className={`flex-shrink-0 p-3 rounded-full ${iconBgs[colorToUse]}`}>
-            <Icon className={`h-5 w-5 ${iconColors[colorToUse]}`} aria-hidden="true" />
-          </div>
-          <div className="ml-4 w-0 flex-1">
-            <dl>
-              <dt className="text-sm font-medium text-gray-600 truncate">{title}</dt>
-              <dd className="flex items-baseline">
-                <div className="text-xl font-bold text-gray-900">{value}</div>
-                {trend !== undefined && trend !== null && ( // Render trend only if provided
-                  <span className={`ml-2 flex items-center text-xs font-medium ${trend > 0 ? 'text-green-600' : trend < 0 ? 'text-red-600' : 'text-gray-500'}`}>
-                    {trend > 0 ? '+' : ''}{trend}
-                  </span>
-                )}
-              </dd>
-              {subtext && (
-                <div className="mt-1 text-xs text-gray-500 truncate">
-                  {subtext}
-                </div>
-              )}
-            </dl>
-          </div>
-        </div>
-      </div>
-      {linkText && ( // Render link section only if linkText is provided
-        <div className="bg-white bg-opacity-60 px-4 py-2.5 border-t border-gray-100">
-          <div className="text-sm">
-            <a
-              href={linkHref || "#"}
-              className={`font-medium ${iconColors[colorToUse]} hover:text-blue-800 transition-colors duration-200 inline-flex items-center`}
-              onClick={onClick}
-            >
-              {linkText}
-              <ChevronRightIcon className="ml-1 h-4 w-4" />
-            </a>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-
-const InsightCard = ({ insight, isExpanded, teamMembers, onToggle, onDismiss, onAction }) => {
-  const typeIcons = {
-    warning: <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500" />,
-    info: <CheckBadgeIcon className="h-5 w-5 text-green-500" />,
-    recommendation: <LightBulbIcon className="h-5 w-5 text-blue-500" />
-  };
-
-  const typeGradients = {
-    warning: 'bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200', // Adjusted gradient
-    info: 'bg-gradient-to-br from-green-50 to-teal-50 border-green-200',
-    recommendation: 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200'
-  };
-
-  const typeColors = {
-    warning: 'text-yellow-700',
-    info: 'text-green-700',
-    recommendation: 'text-blue-700'
-  };
-
-  const typeBorders = {
-    warning: 'border-yellow-200',
-    info: 'border-green-200',
-    recommendation: 'border-blue-200'
-  };
-
-  const typeButtonColors = {
-    warning: 'bg-yellow-500 hover:bg-yellow-600',
-    info: 'bg-green-500 hover:bg-green-600',
-    recommendation: 'bg-blue-500 hover:bg-blue-600'
-  };
-
-  const safeType = insight.type && typeIcons[insight.type] ? insight.type : 'info'; // Default to 'info' if type is invalid
-
-  const relatedMember = insight.relatedMember
-    ? teamMembers.find(m => m.id === insight.relatedMember)
-    : null;
-
-  return (
-    <div
-      className={`rounded-xl shadow-sm border ${typeBorders[safeType]} ${typeGradients[safeType]} transition-all duration-200 ${
-        isExpanded ? 'shadow-md' : 'hover:shadow'
-      }`}
-    >
-      <div
-        className="p-4 cursor-pointer"
-        onClick={onToggle}
-      >
-        <div className="flex items-start">
-          <div className="flex-shrink-0 pt-0.5">
-            {typeIcons[safeType]}
-          </div>
-          <div className="ml-3 flex-1">
-            <h3 className={`text-sm font-medium ${typeColors[safeType]}`}>{insight.title}</h3>
-            <p className={`text-sm mt-1 ${isExpanded ? typeColors[safeType] : 'text-gray-600'}`}>
-              {insight.text}
-            </p>
-
-            {/* Related member info */}
-            {relatedMember && (
-              <div className="mt-2 flex items-center">
-                <Avatar
-                  src={relatedMember.avatar}
-                  alt={relatedMember.name}
-                  size="sm"
-                />
-                <span className="ml-2 text-xs text-gray-500">Related to: {relatedMember.name}</span>
-              </div>
-            )}
-
-            {/* Created date */}
-            <div className="mt-2 text-xs text-gray-500">
-              {new Date(insight.createdAt).toLocaleString()}
-            </div>
-
-            {/* Action buttons */}
-            {isExpanded && (
-              <div className="mt-3 flex justify-end space-x-2">
-                <button
-                  className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors duration-200"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent toggle when clicking button
-                    onDismiss();
-                  }}
-                >
-                  Dismiss
-                </button>
-                <button
-                  className={`text-xs px-2 py-1 ${typeButtonColors[safeType]} text-white rounded transition-colors duration-200`}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent toggle when clicking button
-                    onAction();
-                  }}
-                >
-                  Take Action
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
+// Import mock data
+import { mockTeamMembers, mockTeamAnalytics, mockAiInsights } from '../../data/mockDashboardData';
 
 // Main Dashboard Component
 function ManagerDashboard() {
@@ -413,10 +41,12 @@ function ManagerDashboard() {
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
+  const [scheduledMeetings, setScheduledMeetings] = useState([]);
 
   // Using mock data (in real app, this would come from props or API call)
   const teamMembers = mockTeamMembers;
   const insights = mockAiInsights;
+  const teamAnalytics = mockTeamAnalytics; // Use our new analytics data
 
   // Derived/memoized data
   const stats = useMemo(() => {
@@ -487,6 +117,12 @@ function ManagerDashboard() {
      setSelectedInsight(null); // Close the card after taking action
   };
 
+  const handleMeetingScheduled = (meetingDetails) => {
+    setScheduledMeetings(prev => [...prev, meetingDetails]);
+    // Show notification or update UI to reflect the scheduled meeting
+    console.log(`New meeting scheduled with ${meetingDetails.teamMemberName}`);
+  };
+
   // Handler for StatCard clicks (example)
   const handleViewAllMembers = () => {
       console.log("Navigate to all members view");
@@ -498,7 +134,7 @@ function ManagerDashboard() {
       handleFilterChange('on track'); // Set filter as an example
   };
 
-    const handleViewTaskBreakdown = () => {
+  const handleViewTaskBreakdown = () => {
       console.log("Navigate/show task breakdown view");
   };
 
@@ -552,7 +188,6 @@ function ManagerDashboard() {
           subtext="Onboarding tasks completed"
           color={stats.taskCompletionRate >= 75 ? "purple" : stats.taskCompletionRate >= 50 ? "blue" : "yellow"}
           trend={+2} // Example trend
-          // FIX: Added missing linkText prop
           linkText="View Breakdown"
           onClick={handleViewTaskBreakdown}
         />
@@ -573,8 +208,78 @@ function ManagerDashboard() {
       </section>
 
       {/* Main Content Area */}
-      {/* FIX: Corrected structure - Team Members and AI Insights are now siblings */}
+      {/* Grid structure with 3 columns on large screens */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Team Analytics Section - Full Width */}
+        <div className="lg:col-span-3 mb-6">
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                <DocumentChartBarIcon className="w-5 h-5 mr-2 text-indigo-500"/>
+                Team Analytics
+              </h2>
+              <div className="flex gap-2">
+                <Badge label="Enhanced" color="indigo" size="sm" />
+                <button 
+                  className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium py-1 px-2 rounded flex items-center transition-colors"
+                  onClick={handleRefreshData}
+                >
+                  <ArrowPathIcon className={`h-3.5 w-3.5 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Dynamic Team Progress Visualization */}
+              <div className="md:col-span-2">
+                <TeamProgressChart historicalData={teamAnalytics.historicalProgress} />
+              </div>
+              
+              {/* Comparative Benchmarks */}
+              <div className="md:col-span-1">
+                <ComparativeBenchmarks benchmarkData={teamAnalytics.benchmarks} />
+              </div>
+            </div>
+            
+            {/* Predictive Analytics */}
+            <div className="mt-6">
+              <PredictiveAnalytics 
+                predictions={teamAnalytics.predictions} 
+                teamMembers={teamMembers} 
+              />
+            </div>
+            
+            {/* Emotion Analysis Section */}
+            <div className="mt-6">
+              <ManagerEmotionInsights 
+                teamMemberData={teamMembers.map(member => ({
+                  ...member,
+                  id: member.id,
+                  name: member.name,
+                  role: member.role,
+                  avatar: member.avatar,
+                  emotion: member.triggers?.includes("API documentation confusion") 
+                    ? "confused" 
+                    : member.triggers?.includes("Positive feedback") 
+                    ? "excited" 
+                    : member.triggers?.includes("Fast progress") 
+                    ? "interested" 
+                    : "neutral",
+                  trend: member.productivity === "Exceeding" 
+                    ? "improving" 
+                    : member.productivity === "Needs Support" 
+                    ? "declining" 
+                    : "stable",
+                  onboardingProgress: member.onboardingProgress,
+                  recentInteractions: member.recentInteractions,
+                  triggers: member.triggers
+                }))}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Team Members Section */}
         <div className="lg:col-span-2 space-y-6">
@@ -656,6 +361,9 @@ function ManagerDashboard() {
                   gradient: 'bg-gradient-to-r from-gray-50 to-slate-50',
                   border: 'border-gray-200'
                 };
+
+                // Check if we need to show a support prompt for this team member
+                const needsSupport = member.productivity === 'Needs Support' || member.productivity === 'At Risk';
 
                 return (
                   <div key={member.id} className={`rounded-xl shadow-sm ${memberColor.border} hover:shadow-md transition-all p-4 ${memberColor.gradient}`}>
@@ -757,16 +465,86 @@ function ManagerDashboard() {
                         </button>
                       </div>
                     </div>
+
+                    {/* Recent Interactions Section */}
+                    <div className="mt-4 border-t border-gray-200/80 pt-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">Recent Interactions</span>
+                      </div>
+                      <p className="text-sm text-gray-600">{member.recentInteractions}</p>
+                      
+                      {/* Support Action Section - Highlight for team members that need support */}
+                      {needsSupport && (
+                        <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                          <div className="flex items-start">
+                            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500 mt-0.5 mr-2 flex-shrink-0" />
+                            <div>
+                              <h4 className="text-sm font-medium text-yellow-800">
+                                {member.name} may need additional support
+                              </h4>
+                              <p className="mt-1 text-xs text-yellow-700">
+                                {member.name.split(' ')[0]} is currently marked as "{member.productivity}". Consider scheduling a 1:1 meeting to address challenges.
+                              </p>
+                              <div className="mt-2">
+                                <ScheduleMeetingButton 
+                                  teamMember={member} 
+                                  variant="warning"
+                                  size="sm"
+                                  onScheduled={handleMeetingScheduled} 
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Regular actions for all members */}
+                      <div className="mt-3 flex justify-between items-center">
+                        <button className="text-xs font-medium px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-sm hover:shadow inline-flex items-center">
+                          View details <ChevronRightIcon className="w-3.5 h-3.5 ml-1"/>
+                        </button>
+                        
+                        {/* Add schedule button for all members, with different styling based on status */}
+                        <ScheduleMeetingButton 
+                          teamMember={member} 
+                          variant={needsSupport ? 'warning' : 'light'} 
+                          size="sm"
+                          onScheduled={handleMeetingScheduled} 
+                        />
+                      </div>
+                    </div>
                   </div> // End member card
                 );
               }) // End map
             )}
           </div> {/* End Team Members Cards container */}
+          
+          {/* Show scheduled meetings summary if any */}
+          {scheduledMeetings.length > 0 && (
+            <div className="mt-8 bg-white rounded-xl shadow-md border border-indigo-200 p-4">
+              <h3 className="text-md font-semibold text-indigo-800 mb-3 flex items-center">
+                <CalendarIcon className="w-5 h-5 mr-2 text-indigo-600" />
+                Upcoming 1:1 Meetings
+              </h3>
+              <div className="space-y-2">
+                {scheduledMeetings.map((meeting, index) => (
+                  <div key={index} className="flex items-center justify-between bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-100">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></div>
+                      <span className="text-sm font-medium text-gray-800">{meeting.teamMemberName}</span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {meeting.date} at {meeting.time} ({meeting.duration} min)
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div> {/* End Team Members Section (lg:col-span-2) */}
 
         {/* AI Insights Section */}
-        {/* FIX: Moved this section to be a direct child of the grid */}
-        <div id="ai-insights" className="lg:col-span-1 space-y-6"> {/* Adjusted to col-span-1 */}
+        <div id="ai-insights" className="lg:col-span-1 space-y-6">
           {/* Insights Header */}
           <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-md border border-indigo-200 p-4 sticky top-4 z-10"> {/* Added sticky for scrolling */}
             <div className="flex items-center justify-between flex-wrap gap-2">
