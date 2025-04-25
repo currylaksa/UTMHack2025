@@ -27,6 +27,7 @@ import TeamProgressChart from '../../components/dashboard/TeamProgressChart';
 import ComparativeBenchmarks from '../../components/dashboard/ComparativeBenchmarks';
 import PredictiveAnalytics from '../../components/dashboard/PredictiveAnalytics';
 import InsightCard from '../../components/dashboard/InsightCard';
+import ScheduleMeetingButton from '../../components/dashboard/ScheduleMeetingButton';
 
 // Import utilities
 import { formatDate, daysSince, getMonthTitle, getProductivityClass } from '../../utils/dashboardUtils';
@@ -40,6 +41,7 @@ function ManagerDashboard() {
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
+  const [scheduledMeetings, setScheduledMeetings] = useState([]);
 
   // Using mock data (in real app, this would come from props or API call)
   const teamMembers = mockTeamMembers;
@@ -113,6 +115,12 @@ function ManagerDashboard() {
     // In a real app, we would call markAsActioned(id) or navigate
     console.log(`Taking action on insight: ${id}`);
      setSelectedInsight(null); // Close the card after taking action
+  };
+
+  const handleMeetingScheduled = (meetingDetails) => {
+    setScheduledMeetings(prev => [...prev, meetingDetails]);
+    // Show notification or update UI to reflect the scheduled meeting
+    console.log(`New meeting scheduled with ${meetingDetails.teamMemberName}`);
   };
 
   // Handler for StatCard clicks (example)
@@ -354,6 +362,9 @@ function ManagerDashboard() {
                   border: 'border-gray-200'
                 };
 
+                // Check if we need to show a support prompt for this team member
+                const needsSupport = member.productivity === 'Needs Support' || member.productivity === 'At Risk';
+
                 return (
                   <div key={member.id} className={`rounded-xl shadow-sm ${memberColor.border} hover:shadow-md transition-all p-4 ${memberColor.gradient}`}>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -461,12 +472,75 @@ function ManagerDashboard() {
                         <span className="text-sm font-medium bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">Recent Interactions</span>
                       </div>
                       <p className="text-sm text-gray-600">{member.recentInteractions}</p>
+                      
+                      {/* Support Action Section - Highlight for team members that need support */}
+                      {needsSupport && (
+                        <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                          <div className="flex items-start">
+                            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500 mt-0.5 mr-2 flex-shrink-0" />
+                            <div>
+                              <h4 className="text-sm font-medium text-yellow-800">
+                                {member.name} may need additional support
+                              </h4>
+                              <p className="mt-1 text-xs text-yellow-700">
+                                {member.name.split(' ')[0]} is currently marked as "{member.productivity}". Consider scheduling a 1:1 meeting to address challenges.
+                              </p>
+                              <div className="mt-2">
+                                <ScheduleMeetingButton 
+                                  teamMember={member} 
+                                  variant="warning"
+                                  size="sm"
+                                  onScheduled={handleMeetingScheduled} 
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Regular actions for all members */}
+                      <div className="mt-3 flex justify-between items-center">
+                        <button className="text-xs font-medium px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-sm hover:shadow inline-flex items-center">
+                          View details <ChevronRightIcon className="w-3.5 h-3.5 ml-1"/>
+                        </button>
+                        
+                        {/* Add schedule button for all members, with different styling based on status */}
+                        <ScheduleMeetingButton 
+                          teamMember={member} 
+                          variant={needsSupport ? 'warning' : 'light'} 
+                          size="sm"
+                          onScheduled={handleMeetingScheduled} 
+                        />
+                      </div>
                     </div>
                   </div> // End member card
                 );
               }) // End map
             )}
           </div> {/* End Team Members Cards container */}
+          
+          {/* Show scheduled meetings summary if any */}
+          {scheduledMeetings.length > 0 && (
+            <div className="mt-8 bg-white rounded-xl shadow-md border border-indigo-200 p-4">
+              <h3 className="text-md font-semibold text-indigo-800 mb-3 flex items-center">
+                <CalendarIcon className="w-5 h-5 mr-2 text-indigo-600" />
+                Upcoming 1:1 Meetings
+              </h3>
+              <div className="space-y-2">
+                {scheduledMeetings.map((meeting, index) => (
+                  <div key={index} className="flex items-center justify-between bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-100">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></div>
+                      <span className="text-sm font-medium text-gray-800">{meeting.teamMemberName}</span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {meeting.date} at {meeting.time} ({meeting.duration} min)
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div> {/* End Team Members Section (lg:col-span-2) */}
 
         {/* AI Insights Section */}
