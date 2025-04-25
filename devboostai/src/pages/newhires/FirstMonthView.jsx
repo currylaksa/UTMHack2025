@@ -173,6 +173,30 @@ const upcomingEvents = [
   }
 ];
 
+// NEW: Add predefined chat scenarios with intelligent responses
+const preDefined = {
+  docker: {
+    response: "I see you need help with Docker setup! I found these resources for you:\n\n1. The Docker Desktop installation guide in the Resources panel (95% match to your needs)\n2. A 8-minute video walkthrough by Bob who set up the same environment\n3. Common Docker troubleshooting steps\n\nWould you like me to walk you through the installation steps? Or connect you with Bob who's an expert on our Docker setup?",
+    suggestedResources: ['fmr1', 'fmr6'],
+    suggestedConnection: 'Bob Buddy'
+  },
+  codebase: {
+    response: "Great question about our codebase structure! The frontend uses React with a component-based architecture. Here's what will help you get oriented:\n\n1. I've highlighted the 'Project Architecture Overview' in your Resources panel\n2. Check the 'Frontend Component Library' doc for our UI components\n3. The main application flow starts in App.jsx\n\nCharlie from your team is the frontend expert - would you like me to schedule a 15-min walkthrough with them?",
+    suggestedResources: ['fmr1', 'fmr5'],
+    suggestedConnection: 'Charlie Teammate'
+  },
+  apiDocs: {
+    response: "You're looking for our API documentation - perfect timing! I've prioritized these resources for you:\n\n1. Complete API Documentation (just updated last week)\n2. A guide to authentication and endpoints\n\nAlso, I noticed you're working on frontend integration. There's a template for API calls in src/services/api.js that shows the correct pattern to use.",
+    suggestedResources: ['fmr4', 'fmr1'],
+    suggestedConnection: null
+  },
+  workflow: {
+    response: "Understanding our team's workflow is crucial! I've highlighted these resources for you:\n\n1. 'Intro to Team Workflow' video that explains our process\n2. Git workflow tutorial showing our branching strategy\n\nAlso, Alice scheduled the team's workflow overview meeting for April 25th - I've marked it as important in your calendar.",
+    suggestedResources: ['fmr3', 'fmr6'],
+    suggestedConnection: 'Alice Manager'
+  }
+};
+
 const chatMessages = [
   {
     id: 'm1',
@@ -471,30 +495,69 @@ function FirstMonthView() {
     setMessages([...messages, newUserMessage]);
     setChatInput('');
     
-    // For demo: Check if the message matches our demo scenario
-    if (chatInput.toLowerCase().includes('where can i find the guide') || 
-        chatInput.toLowerCase().includes('development environment')) {
-      setTimeout(() => {
-        const demoResponse = {
-          id: `m${messages.length + 2}`,
-          sender: 'ai',
-          message: 'Great question! You can find the detailed guide in the "Resources Panel" on this page, or check the "Technical Setup Guide" section right here. I can also walk you through it step-by-step if you like.',
-          timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-        };
-        setMessages(prev => [...prev, demoResponse]);
-      }, 1000);
-    } else {
-      // Default response for other messages
-      setTimeout(() => {
-        const aiResponse = {
-          id: `m${messages.length + 2}`,
-          sender: 'ai',
-          message: 'I can help with that! Check out the resources section for guides or let me know if you have specific questions about the setup process.',
-          timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-        };
-        setMessages(prev => [...prev, aiResponse]);
-      }, 1000);
-    }
+    // Check if message matches any of our pre-defined scenarios
+    const lowerCaseInput = chatInput.toLowerCase();
+    
+    setTimeout(() => {
+      let aiResponse;
+      let highlightResources = [];
+      let suggestedTeamMember = null;
+      
+      // Check which pre-defined scenario the message matches
+      if (lowerCaseInput.includes('docker') || lowerCaseInput.includes('container') || lowerCaseInput.includes('environment setup')) {
+        aiResponse = preDefined.docker.response;
+        highlightResources = preDefined.docker.suggestedResources;
+        suggestedTeamMember = preDefined.docker.suggestedConnection;
+      } 
+      else if (lowerCaseInput.includes('codebase') || lowerCaseInput.includes('architecture') || lowerCaseInput.includes('code structure')) {
+        aiResponse = preDefined.codebase.response;
+        highlightResources = preDefined.codebase.suggestedResources;
+        suggestedTeamMember = preDefined.codebase.suggestedConnection;
+      }
+      else if (lowerCaseInput.includes('api') || lowerCaseInput.includes('documentation') || lowerCaseInput.includes('backend')) {
+        aiResponse = preDefined.apiDocs.response;
+        highlightResources = preDefined.apiDocs.suggestedResources;
+        suggestedTeamMember = preDefined.apiDocs.suggestedConnection;
+      }
+      else if (lowerCaseInput.includes('workflow') || lowerCaseInput.includes('process') || lowerCaseInput.includes('git')) {
+        aiResponse = preDefined.workflow.response;
+        highlightResources = preDefined.workflow.suggestedResources;
+        suggestedTeamMember = preDefined.workflow.suggestedConnection;
+      }
+      else if (lowerCaseInput.includes('where can i find the guide') || lowerCaseInput.includes('development environment')) {
+        aiResponse = 'Great question! You can find the detailed guide in the "Resources Panel" on this page, or check the "Technical Setup Guide" section right here. I can also walk you through it step-by-step if you like.';
+      }
+      else {
+        // Default response for other messages
+        aiResponse = 'I can help with that! Check out the resources section for guides or let me know if you have specific questions about the setup process.';
+      }
+      
+      // Send AI response
+      const responseMessage = {
+        id: `m${messages.length + 2}`,
+        sender: 'ai',
+        message: aiResponse,
+        timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+      };
+      
+      setMessages(prev => [...prev, responseMessage]);
+      
+      // If we have resources to highlight, update the UI to show them
+      if (highlightResources.length > 0) {
+        setResourceView('priority');
+        
+        // Could add animation or highlighting to draw attention to the resources panel
+        // For a real implementation, we would update the resources list to prioritize these resources
+      }
+      
+      // If we have a team member to suggest, update the UI
+      if (suggestedTeamMember) {
+        const memberIndex = teamMembers.findIndex(member => member.name === suggestedTeamMember);
+        if (memberIndex !== -1) {
+          setActiveTeamMember(teamMembers[memberIndex].id); 
+        }
+      }
+    }, 1000);
   };
 
   // Toggle task completion status
@@ -1602,23 +1665,15 @@ function FirstMonthView() {
                     <div className="flex justify-between">
                       <span className="font-medium text-gray-800 text-sm">{event.title}</span>
                       {event.type === 'important' && (
-                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
-                          Important
-                        </span>
+                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full flex items-center">
+                        <span className="text-xs font-medium">Important</span>
+                      </span>
                       )}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1 flex items-center">
-                      <CalendarIcon className="w-3 h-3 mr-1" />
-                      {event.date} • {event.time}
-                    </div>
+                    <div className="text-xs text-gray-500">{event.date} at {event.time}</div>
                   </li>
                 ))}
               </ul>
-              
-              <button className="mt-3 w-full py-2 bg-teal-100 text-teal-700 rounded-md text-sm font-medium hover:bg-teal-200 transition-colors flex items-center justify-center">
-                <CalendarIcon className="w-4 h-4 mr-2" />
-                View Full Calendar
-              </button>
             </div>
           </div>
         </div>
