@@ -3,6 +3,10 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+// Import chart images
+import productivityChartDesktop from '../images/LandingPageImage/productivity-chart-desktop.png';
+import productivityChartMobile from '../images/LandingPageImage/productivity-chart-mobile.png';
+
 // Animation variants for reuse
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -249,167 +253,67 @@ function LandingPage() {
               Accelerate Your Engineering Team
             </motion.h2>
             
-            {/* NEW: Productivity Curve Animation */}
+            {/* Productivity Curve Animation - Now using images for better display */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="mb-16 bg-white rounded-xl shadow-lg p-6 border border-gray-200"
+              className="mb-16 bg-white rounded-xl shadow-lg p-3 sm:p-6 border border-gray-200 overflow-hidden"
             >
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Engineer Productivity Over Time</h3>
-              <div className="flex flex-col md:flex-row gap-6 items-center">
-                <div className="md:w-2/3 h-64 relative">
-                  {/* Coordinate system */}
-                  <div className="absolute left-0 bottom-0 w-full h-full flex flex-col justify-between">
-                    <div className="w-full border-b border-gray-200 h-0 relative">
-                      <span className="absolute -top-6 -left-2 text-xs text-gray-500">100%</span>
-                    </div>
-                    <div className="w-full border-b border-gray-200 h-0 relative">
-                      <span className="absolute -top-6 -left-2 text-xs text-gray-500">75%</span>
-                    </div>
-                    <div className="w-full border-b border-gray-200 h-0 relative">
-                      <span className="absolute -top-6 -left-2 text-xs text-gray-500">50%</span>
-                    </div>
-                    <div className="w-full border-b border-gray-200 h-0 relative">
-                      <span className="absolute -top-6 -left-2 text-xs text-gray-500">25%</span>
-                    </div>
-                    <div className="w-full border-b border-gray-200 h-0 relative">
-                      <span className="absolute -top-6 -left-2 text-xs text-gray-500">0%</span>
-                    </div>
+              <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-center">
+                {/* Chart container with responsive images */}
+                <div className="w-full lg:w-2/3">
+                  {/* Desktop image - only shown on lg screens and up */}
+                  <div className="hidden lg:block">
+                    <motion.img
+                      src={productivityChartDesktop} 
+                      alt="Engineer productivity chart showing DevBoost AI accelerates productivity by 30% compared to traditional onboarding"
+                      className="w-full rounded-lg"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.8 }}
+                    />
                   </div>
                   
-                  {/* X-axis labels */}
-                  <div className="absolute left-0 bottom-0 w-full flex justify-between px-6 pb-4">
-                    <span className="text-xs text-gray-500">Week 1</span>
-                    <span className="text-xs text-gray-500">Week 4</span>
-                    <span className="text-xs text-gray-500">Week 8</span>
-                    <span className="text-xs text-gray-500">Week 12</span>
+                  {/* Mobile image - only shown below lg screens */}
+                  <div className="lg:hidden">
+                    <motion.img
+                      src={productivityChartMobile} 
+                      alt="Engineer productivity chart showing DevBoost AI accelerates productivity by 30% compared to traditional onboarding"
+                      className="w-full rounded-lg"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.8 }}
+                    />
                   </div>
-                  
-                  {/* Traditional curve */}
-                  <motion.div 
-                    className="absolute bottom-0 left-0 w-full h-full"
-                    initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.5, delay: 0.5 }}
-                  >
-                    <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                      <path 
-                        d="M0,100 Q25,85 50,70 T100,45" 
-                        fill="none" 
-                        stroke="#9CA3AF" 
-                        strokeWidth="3"
-                        strokeDasharray="0 1"
-                        strokeDashoffset="0"
-                        style={{ strokeDasharray: 1000, strokeDashoffset: 1000, animation: "dash 2s linear forwards" }}
-                      />
-                      <text x="70" y="55" fill="#6B7280" fontSize="3.5" textAnchor="middle" fontWeight="500">
-                        Traditional Onboarding
-                      </text>
-                    </svg>
-                  </motion.div>
-
-                  {/* DevBoost AI curve */}
-                  <motion.div 
-                    className="absolute bottom-0 left-0 w-full h-full"
-                    initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.5, delay: 1 }}
-                  >
-                    <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                      <path 
-                        d="M0,100 Q15,65 40,40 T100,20" 
-                        fill="none" 
-                        stroke="#3B82F6" 
-                        strokeWidth="4"
-                        style={{ strokeDasharray: 1000, strokeDashoffset: 1000, animation: "dash 2s linear forwards" }}
-                      />
-                      <text x="70" y="30" fill="#2563EB" fontSize="4" fontWeight="bold" textAnchor="middle">
-                        With DevBoost AI
-                      </text>
-
-                      {/* Acceleration indicator - repositioned and improved */}
-                      <motion.g
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 2, duration: 0.5 }}
-                      >
-                        {/* Green arrow */}
-                        <path 
-                          d="M30,70 L50,40" 
-                          fill="none" 
-                          stroke="#10B981" 
-                          strokeWidth="2"
-                          markerEnd="url(#arrowhead)"
-                        />
-                        
-                        {/* Arrowhead definition */}
-                        <defs>
-                          <marker
-                            id="arrowhead"
-                            markerWidth="10"
-                            markerHeight="7"
-                            refX="9"
-                            refY="3.5"
-                            orient="auto"
-                          >
-                            <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
-                          </marker>
-                        </defs>
-                        
-                        {/* Text label with background for better visibility */}
-                        <rect 
-                          x="35" 
-                          y="35" 
-                          width="30" 
-                          height="10" 
-                          rx="5" 
-                          fill="#E5FAF0" 
-                          stroke="#10B981"
-                          strokeWidth="0.5"
-                        />
-                        <text 
-                          x="50" 
-                          y="42" 
-                          fill="#059669" 
-                          fontSize="4" 
-                          fontWeight="bold" 
-                          textAnchor="middle"
-                        >
-                          30% Faster
-                        </text>
-                      </motion.g>
-                    </svg>
-                  </motion.div>
                 </div>
                 
-                <div className="md:w-1/3">
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <h4 className="font-bold text-blue-800 text-lg mb-2">How DevBoost AI Accelerates</h4>
-                    <ul className="text-sm text-gray-700 space-y-2">
+                {/* Info section - styled consistently across devices */}
+                <div className="w-full lg:w-1/3 mt-4 lg:mt-0">
+                  <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-200">
+                    <h4 className="font-bold text-blue-800 text-base sm:text-lg mb-2">How DevBoost AI Accelerates</h4>
+                    <ul className="text-xs sm:text-sm text-gray-700 space-y-2">
                       <li className="flex items-start">
-                        <svg className="h-5 w-5 text-blue-500 mr-1.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mr-1.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>Personalized learning paths based on role</span>
                       </li>
                       <li className="flex items-start">
-                        <svg className="h-5 w-5 text-blue-500 mr-1.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mr-1.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>24/7 AI assistance for instant answers</span>
                       </li>
                       <li className="flex items-start">
-                        <svg className="h-5 w-5 text-blue-500 mr-1.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mr-1.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>Automated task tracking & progress monitoring</span>
                       </li>
                       <li className="flex items-start">
-                        <svg className="h-5 w-5 text-blue-500 mr-1.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mr-1.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>Reduced manager involvement in routine tasks</span>
