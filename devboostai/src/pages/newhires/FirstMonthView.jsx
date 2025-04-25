@@ -4,6 +4,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 // Import components
 import EmotionMonitor from '../../components/EmotionMonitor';
+import EmotionDetector from '../../components/EmotionDetector';
 import LearningPathSection from '../../components/dashboard/LearningPathSection';
 import TechnicalSetupGuide from '../../components/dashboard/TechnicalSetupGuide';
 import TeamMembersSection from '../../components/dashboard/TeamMembersSection';
@@ -136,6 +137,9 @@ function FirstMonthView() {
 
   return (
     <div className="space-y-6">
+      {/* Emotion Detector Component */}
+      <EmotionDetector />
+      
       {/* Header with Back Button and Progress Summary */}
       <div className="flex flex-col md:flex-row md:items-center justify-between bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200">
         <div className="flex items-center mb-4 md:mb-0">
