@@ -303,7 +303,7 @@ function TimelineView() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       {/* Header Card */}
       <div className={`bg-gradient-to-br from-white via-white to-blue-50 p-6 rounded-xl shadow-lg border border-blue-100 relative overflow-hidden transition-all duration-700 ${animateHeader ? 'transform-none opacity-100' : 'transform translate-y-4 opacity-0'}`}>
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full opacity-70 blur-xl"></div>
@@ -396,7 +396,7 @@ function TimelineView() {
               return (
                 <div key={stage.month} className="relative flex flex-col items-center">
                   {/* Knowledge domain label - now positioned better */}
-                  <div className={`absolute -top-14 left-1/2 transform -translate-x-1/2 
+                  <div className={`absolute -top-20 left-1/2 transform -translate-x-1/2 
                     text-xs px-3 py-1 rounded-full ${stage.domainColor} text-white font-medium
                     whitespace-nowrap transition-all duration-300
                     ${(isSelected || isCurrent) ? 'opacity-100' : 'opacity-70'}`}
@@ -405,7 +405,7 @@ function TimelineView() {
                   </div>
                   
                   {/* Month label */}
-                  <div className={`absolute -top-5 left-1/2 transform -translate-x-1/2
+                  <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2
                     text-sm font-medium px-2 py-0.5 bg-white rounded-full shadow-sm border border-gray-100
                     ${stage.textColor} transition-all duration-300 whitespace-nowrap`}
                   >
@@ -494,15 +494,6 @@ function TimelineView() {
                       )}
                     </div>
                   </button>
-
-                  {/* Month information displayed below - clear format for month ranges */}
-                  <div className="absolute top-full pt-3 left-1/2 transform -translate-x-1/2 text-center">
-                    <span className="text-xs inline-block px-2 py-1 bg-white rounded-lg shadow-sm text-gray-600 whitespace-nowrap">
-                      {typeof stage.month === 'string' && stage.month.includes('&') ? 
-                        stage.month.replace('&', '-') : 
-                        `Month ${stage.month}`}
-                    </span>
-                  </div>
                 </div>
               );
             })}
