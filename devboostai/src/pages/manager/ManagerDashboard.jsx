@@ -927,6 +927,34 @@ function ManagerDashboard() {
                 teamMembers={teamMembers} 
               />
             </div>
+            
+            {/* Emotion Analysis Section */}
+            <div className="mt-6">
+              <ManagerEmotionInsights 
+                teamMemberData={teamMembers.map(member => ({
+                  ...member,
+                  id: member.id,
+                  name: member.name,
+                  role: member.role,
+                  avatar: member.avatar,
+                  emotion: member.triggers?.includes("API documentation confusion") 
+                    ? "confused" 
+                    : member.triggers?.includes("Positive feedback") 
+                    ? "excited" 
+                    : member.triggers?.includes("Fast progress") 
+                    ? "interested" 
+                    : "neutral",
+                  trend: member.productivity === "Exceeding" 
+                    ? "improving" 
+                    : member.productivity === "Needs Support" 
+                    ? "declining" 
+                    : "stable",
+                  onboardingProgress: member.onboardingProgress,
+                  recentInteractions: member.recentInteractions,
+                  triggers: member.triggers
+                }))}
+              />
+            </div>
           </div>
         </div>
 
